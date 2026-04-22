@@ -1,0 +1,26 @@
+# FFmpeg binaries
+*/ffmpeg*
+*/ffprobe*
+
+# Python dependencies
+__pycache__/
+*.pyc
+venv/
+env/
+
+# macOS
+.DS_Store
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Build files
+*/build/
+*.xcworkspace
+*.xcodeproj/project.xcworkspace
+
+# Xcode
+*.xcuserstate
+*.xcscmblueprint
