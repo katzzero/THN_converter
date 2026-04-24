@@ -1,6 +1,6 @@
-# FFmpeg binaries
-*/ffmpeg*
-*/ffprobe*
+# FFmpeg binaries (but keep the one in thn-converter root)
+ffmpeg
+ffprobe
 
 # Python dependencies
 __pycache__/

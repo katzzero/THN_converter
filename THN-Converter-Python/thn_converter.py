@@ -10,6 +10,7 @@ import os
 import re
 import platform
 from pathlib import Path
+from datetime import datetime
 
 class ConversionSettings:
     def __init__(self):
@@ -57,7 +58,7 @@ class VideoConverter:
         }
         
         coords = positions.get(position, positions["bottom-center"])
-        return f"drawtext=text='%{{pts\\:HMS}}':fontfile=/System/Library/Fonts/Supplemental/Courier New.ttf:fontsize={font_size}:fontcolor={font_color}:box=1:boxcolor={box_color}:{coords}"
+        return f"drawtext=text='\\%{{gmtime\\:%H:%M:%S}}':fontfile=/System/Library/Fonts/Helvetica.ttc:fontsize={font_size}:fontcolor={font_color}:box=1:boxcolor={box_color}:{coords}"
     
     def convert(self, input_path, output_path, settings, on_progress=None, on_output=None):
         args = [
@@ -403,7 +404,9 @@ class ConverterApp(ctk.CTk):
             # Se não foi definido output, definir padrão
             if not self.output_file:
                 output_dir = str(Path.home() / "Downloads")
-                output_name = Path(file_path).stem + "_converted.mp4"
+                codec_suffix = self.video_codec_var.get().lower().replace("/", "_").replace(" ", "_")
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                output_name = Path(file_path).stem + f"_{codec_suffix}_{timestamp}.mp4"
                 self.output_file = os.path.join(output_dir, output_name)
                 self.output_label.configure(text=Path(self.output_file).name)
     
@@ -470,7 +473,9 @@ class ConverterApp(ctk.CTk):
         if not settings.output_path:
             # Gerar nome padrão
             output_dir = str(Path.home() / "Downloads")
-            output_name = Path(self.dropped_file).stem + "_converted.mp4"
+            codec_suffix = self.video_codec_var.get().lower().replace("/", "_").replace(" ", "_")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_name = Path(self.dropped_file).stem + f"_{codec_suffix}_{timestamp}.mp4"
             settings.output_path = os.path.join(output_dir, output_name)
         
         def on_progress(progress):

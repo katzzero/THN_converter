@@ -130,22 +130,23 @@ class VideoConverter: ObservableObject {
         let fontColor = "white"
         let fontSize = "24"
         let boxColor = "black@0.7"
+        let fontPath = "/System/Library/Fonts/Helvetica.ttc"
         
         switch position {
         case "top-left":
-            return "drawtext=text='%{pts\\:HMS}':fontfile=/System/Library/Fonts/Supplemental/Courier New.ttf:fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=10:y=10"
+            return "drawtext=text='\\%{gmtime\\:%H:%M:%S}':fontfile=\(fontPath):fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=10:y=10"
         case "top-center":
-            return "drawtext=text='%{pts\\:HMS}':fontfile=/System/Library/Fonts/Supplemental/Courier New.ttf:fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=(w-tw)/2:y=10"
+            return "drawtext=text='\\%{gmtime\\:%H:%M:%S}':fontfile=\(fontPath):fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=(w-tw)/2:y=10"
         case "top-right":
-            return "drawtext=text='%{pts\\:HMS}':fontfile=/System/Library/Fonts/Supplemental/Courier New.ttf:fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=w-tw-10:y=10"
+            return "drawtext=text='\\%{gmtime\\:%H:%M:%S}':fontfile=\(fontPath):fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=w-tw-10:y=10"
         case "bottom-left":
-            return "drawtext=text='%{pts\\:HMS}':fontfile=/System/Library/Fonts/Supplemental/Courier New.ttf:fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=10:y=h-th-10"
+            return "drawtext=text='\\%{gmtime\\:%H:%M:%S}':fontfile=\(fontPath):fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=10:y=h-th-10"
         case "bottom-center":
-            return "drawtext=text='%{pts\\:HMS}':fontfile=/System/Library/Fonts/Supplemental/Courier New.ttf:fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=(w-tw)/2:y=h-th-10"
+            return "drawtext=text='\\%{gmtime\\:%H:%M:%S}':fontfile=\(fontPath):fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=(w-tw)/2:y=h-th-10"
         case "bottom-right":
-            return "drawtext=text='%{pts\\:HMS}':fontfile=/System/Library/Fonts/Supplemental/Courier New.ttf:fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=w-tw-10:y=h-th-10"
+            return "drawtext=text='\\%{gmtime\\:%H:%M:%S}':fontfile=\(fontPath):fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=w-tw-10:y=h-th-10"
         default:
-            return "drawtext=text='%{pts\\:HMS}':fontfile=/System/Library/Fonts/Supplemental/Courier New.ttf:fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=(w-tw)/2:y=h-th-10"
+            return "drawtext=text='\\%{gmtime\\:%H:%M:%S}':fontfile=\(fontPath):fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=(w-tw)/2:y=h-th-10"
         }
     }
     
@@ -158,7 +159,7 @@ class VideoConverter: ObservableObject {
                 if timeParts.count == 3 {
                     if let h = Double(timeParts[0]), let m = Double(timeParts[1]), let s = Double(timeParts[2]) {
                         let currentTime = h * 3600 + m * 60 + s
-                        onProgress(min(currentTime / 36000, 1.0))
+                        onProgress(currentTime / 36000)
                     }
                 }
             }
@@ -166,8 +167,13 @@ class VideoConverter: ObservableObject {
     }
     
     private func findFFmpeg() -> String {
+        // Try bundle path first (included in app)
+        if let bundlePath = Bundle.main.path(forResource: "ffmpeg", ofType: nil) {
+            return bundlePath
+        }
+        
+        // Fallback to system paths
         let paths = [
-            "./ffmpeg",
             "/usr/local/bin/ffmpeg",
             "/opt/homebrew/bin/ffmpeg",
             "/usr/bin/ffmpeg"
@@ -179,7 +185,7 @@ class VideoConverter: ObservableObject {
             }
         }
         
-        return "./ffmpeg"
+        return "/usr/bin/ffmpeg"
     }
     
     func cancel() {

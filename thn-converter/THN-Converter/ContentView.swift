@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import Foundation
 
 struct ContentView: View {
     @State private var droppedFileURL: URL?
@@ -9,6 +10,8 @@ struct ContentView: View {
     @State private var logOutput = ""
     
     @State private var outputURL: URL?
+    @State private var showingFilePicker = false
+    @State private var logScrollOffset: CGFloat = 0
     
     // Video settings
     @State private var selectedVideoCodec = "H.264"
@@ -61,6 +64,11 @@ struct ContentView: View {
                     handleDrop(providers: providers)
                     return true
                 }
+                .onTapGesture {
+                    if !isConverting {
+                        selectInputFile()
+                    }
+                }
                 .disabled(isConverting)
                 
                 // Output selection
@@ -87,6 +95,11 @@ struct ContentView: View {
                     .disabled(isConverting)
                 }
                 .padding(.horizontal)
+                .onTapGesture {
+                    if !isConverting {
+                        selectOutputFile()
+                    }
+                }
                 
                 // Progress
                 VStack(spacing: 8) {
@@ -265,12 +278,26 @@ struct ContentView: View {
                     .padding(.horizontal)
                     .padding(.top, 10)
                 
-                TextEditor(text: $logOutput)
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundColor(.secondary)
-                    .frame(minHeight: 400)
-                    .padding()
-                    .border(Color.gray.opacity(0.3))
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(logOutput)
+                                .font(.system(size: 12, design: .monospaced))
+                                .foregroundColor(.secondary)
+                                .padding()
+                                .id("logEnd")
+                        }
+                        .frame(minHeight: 400)
+                        .border(Color.gray.opacity(0.3))
+                    }
+                    .onChange(of: logOutput) { _, _ in
+                        DispatchQueue.main.async {
+                            withAnimation(.easeOut(duration: 0.1)) {
+                                proxy.scrollTo("logEnd", anchor: .bottom)
+                            }
+                        }
+                    }
+                }
                 
                 Spacer()
             }
@@ -295,10 +322,27 @@ struct ContentView: View {
         }
     }
     
+    private func selectInputFile() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.movie, .video, .mpeg4Movie]
+        panel.allowsMultipleSelection = false
+        
+        if panel.runModal() == .OK {
+            if let url = panel.url {
+                droppedFileURL = url
+                statusMessage = "Arquivo pronto para conversão"
+            }
+        }
+    }
+    
     private func selectOutputFile() {
         let panel = NSSavePanel()
         if let fileURL = droppedFileURL {
-            panel.nameFieldStringValue = fileURL.deletingPathExtension().lastPathComponent + "_converted.mp4"
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyyMMdd_HHmm"
+            let timestamp = formatter.string(from: Date())
+            let codecSuffix = selectedVideoCodec.lowercased().replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: " ", with: "_")
+            panel.nameFieldStringValue = fileURL.deletingPathExtension().lastPathComponent + "_\(codecSuffix)_\(timestamp).mp4"
         } else {
             panel.nameFieldStringValue = "video_converted.mp4"
         }
@@ -325,8 +369,13 @@ struct ContentView: View {
                 if let fileURL = outputURL {
                     finalOutputURL = fileURL
                 } else {
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyyMMdd_HHmm"
+                    let timestamp = formatter.string(from: Date())
+                    let codecSuffix = selectedVideoCodec.lowercased().replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: " ", with: "_")
+                    let outputFilename = inputURL.deletingPathExtension().lastPathComponent + "_\(codecSuffix)_\(timestamp).mp4"
                     let downloadDir = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
-                    finalOutputURL = downloadDir.appendingPathComponent(inputURL.deletingPathExtension().lastPathComponent + "_converted.mp4")
+                    finalOutputURL = downloadDir.appendingPathComponent(outputFilename)
                     
                     outputURL = finalOutputURL
                 }

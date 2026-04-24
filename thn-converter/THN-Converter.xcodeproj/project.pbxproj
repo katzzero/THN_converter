@@ -7,13 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		39494B722F9A7F0000691F67 /* ffmpeg in Resources */ = {isa = PBXBuildFile; fileRef = 39494B712F9A7F0000691F67 /* ffmpeg */; };
+		39494B742F9A7FE500691F67 /* ffmpeg in CopyFiles */ = {isa = PBXBuildFile; fileRef = 39494B712F9A7F0000691F67 /* ffmpeg */; };
 		A1000001 /* THN_ConverterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* THN_ConverterApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
 		A1000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000003 /* Assets.xcassets */; };
 		A1000004 /* VideoConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000004 /* VideoConverter.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		39494B732F9A7FC800691F67 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				39494B742F9A7FE500691F67 /* ffmpeg in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		39494B712F9A7F0000691F67 /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ffmpeg; sourceTree = "<group>"; };
 		A2000001 /* THN_ConverterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = THN_ConverterApp.swift; sourceTree = "<group>"; };
 		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A2000003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -35,6 +51,7 @@
 		G1000001 = {
 			isa = PBXGroup;
 			children = (
+				39494B712F9A7F0000691F67 /* ffmpeg */,
 				G2000001 /* THN-Converter */,
 				G3000001 /* Products */,
 			);
@@ -69,6 +86,7 @@
 				S1000001 /* Sources */,
 				B1000001 /* Frameworks */,
 				R1000001 /* Resources */,
+				39494B732F9A7FC800691F67 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -118,6 +136,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000003 /* Assets.xcassets in Resources */,
+				39494B722F9A7F0000691F67 /* ffmpeg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,6 +220,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "THN-Converter/THN-Converter.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -229,6 +249,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "THN-Converter/THN-Converter.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
