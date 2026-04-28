@@ -403,7 +403,7 @@ struct ContentView: View {
                     },
                     onOutput: { output in
                         DispatchQueue.main.async {
-                            logOutput.append(output + "\n")
+                            logOutput.append(output)
                         }
                     }
                 )

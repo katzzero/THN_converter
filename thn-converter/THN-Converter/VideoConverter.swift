@@ -34,7 +34,37 @@ class VideoConverter: ObservableObject {
             outputURL = outputDir.appendingPathComponent(outputFilename)
         }
         
+        // Ensure parent directory exists
+        let fileManager = FileManager.default
+        let parentDir = outputURL.deletingLastPathComponent()
+        if !fileManager.fileExists(atPath: parentDir.path) {
+            do {
+                try fileManager.createDirectory(at: parentDir, withIntermediateDirectories: true)
+                onOutput("Diretório criado: \(parentDir.path)\n")
+            } catch {
+                throw NSError(domain: "VideoConverter", code: 2, userInfo: [NSLocalizedDescriptionKey: "Erro ao criar diretório de saída: \(error.localizedDescription)"])
+            }
+        }
+        
+        // Check write permission
+        if !fileManager.isWritableFile(atPath: parentDir.path) {
+            throw NSError(domain: "VideoConverter", code: 4, userInfo: [NSLocalizedDescriptionKey: "Sem permissão de escrita em: \(parentDir.path)"])
+        }
+        
+        // Remove existing file if it exists
+        if fileManager.fileExists(atPath: outputURL.path) {
+            do {
+                try fileManager.removeItem(at: outputURL)
+                onOutput("Arquivo antigo sobrescrito: \(outputURL.lastPathComponent)\n")
+            } catch {
+                throw NSError(domain: "VideoConverter", code: 3, userInfo: [NSLocalizedDescriptionKey: "Erro ao sobrescrever arquivo existente: \(error.localizedDescription)"])
+            }
+        }
+        
         var args: [String] = []
+        
+        // Overwrite output without asking
+        args.append("-y")
         
         // Input file
         args.append("-i")
@@ -94,18 +124,30 @@ class VideoConverter: ObservableObject {
         onOutput("Iniciando conversão...\n")
         onOutput("Entrada: \(inputURL.path)\n")
         onOutput("Saída: \(outputURL.path)\n")
+        onOutput("Caminho absoluta: \(outputURL.absoluteString)\n")
         onOutput("Codec: \(settings.videoCodec) | Qualidade: \(settings.quality)\n")
         onOutput("Áudio: \(settings.audioCodec)\n\n")
+        
+        onOutput("Comando FFmpeg: \(args.joined(separator: " "))\n")
         
         process = Process()
         process?.executableURL = URL(fileURLWithPath: findFFmpeg())
         process?.arguments = args
         
+        let errPipe = Pipe()
+        process?.standardError = errPipe
         let outPipe = Pipe()
         process?.standardOutput = outPipe
-        process?.standardError = outPipe
         
         try process?.run()
+        
+        errPipe.fileHandleForReading.readabilityHandler = { fileHandle in
+            let data = fileHandle.availableData
+            if data.isEmpty { return }
+            if let line = String(data: data, encoding: .utf8) {
+                onOutput("[ERROR] " + line)
+            }
+        }
         
         outPipe.fileHandleForReading.readabilityHandler = { fileHandle in
             let data = fileHandle.availableData
@@ -118,11 +160,14 @@ class VideoConverter: ObservableObject {
         
         process?.waitUntilExit()
         
-        if process?.terminationStatus == 0 {
+        let exitCode = process?.terminationStatus ?? -1
+        if exitCode == 0 {
             onProgress(1.0)
             onOutput("\n✅ Conversão concluída! Arquivo salvo em: \(outputURL.path)\n")
         } else {
-            throw NSError(domain: "VideoConverter", code: 1, userInfo: [NSLocalizedDescriptionKey: "FFmpeg failed with status \(process?.terminationStatus ?? -1)"])
+            let errorMsg = "FFmpeg falhou com código \(exitCode). Verifique se o caminho de saída é válido e tem permissões de escrita."
+            onOutput("\n❌ Erro: \(errorMsg)\n")
+            throw NSError(domain: "VideoConverter", code: Int(exitCode), userInfo: [NSLocalizedDescriptionKey: errorMsg])
         }
     }
     
