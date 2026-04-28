@@ -1,6 +1,11 @@
-# FFmpeg binaries (but keep the one in thn-converter root)
+# FFmpeg binaries (auto-downloaded via build script)
 ffmpeg
+ffmpeg_downloaded_flag
 ffprobe
+*ffprobe*
+
+# Build script (not ignored)
+# download-ffmpeg.sh is tracked manually
 
 # Python dependencies
 __pycache__/

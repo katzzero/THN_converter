@@ -142,6 +142,24 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		39494B752F9A80000691F67 /* Download FFmpeg */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Download FFmpeg";
+			outputPaths = (
+				"$(PROJECT_DIR)/ffmpeg",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "./../download-ffmpeg.sh";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		S1000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
