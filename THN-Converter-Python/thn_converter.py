@@ -58,7 +58,8 @@ class VideoConverter:
         }
         
         coords = positions.get(position, positions["bottom-center"])
-        return f"drawtext=text='\\%{{gmtime\\:%H:%M:%S}}':fontfile=/System/Library/Fonts/Helvetica.ttc:fontsize={font_size}:fontcolor={font_color}:box=1:boxcolor={box_color}:{coords}"
+        # Use gmtime format like Swift does
+        return f"drawtext=text='%{{gmtime\\:%H:%M:%S}}':fontfile=/System/Library/Fonts/Helvetica.ttc:fontsize={font_size}:fontcolor={font_color}:box=1:boxcolor={box_color}:{coords}"
     
     def convert(self, input_path, output_path, settings, on_progress=None, on_output=None):
         args = [
