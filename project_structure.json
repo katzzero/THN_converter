@@ -1,191 +1,467 @@
 {
-  "project": "THN Converter",
-  "version": "1.0.0",
-  "description": "Video converter macOS app with FFmpeg backend, supporting multiple codecs, frame rates, audio options, and timecode overlay.",
-  "created": "2026-04-22",
-  "last_modified": "2026-04-28",
-  "platform": ["macOS"],
-  "languages": ["Swift", "Python"],
-  "frameworks": ["SwiftUI", "UniformTypeIdentifiers", "AppKit", "CustomTkinter"],
-  
-  "git_state": {
-    "branch": "main",
-    "last_commit": "380ee95",
-    "last_commit_date": "2026-04-28",
-    "last_commit_msg": "FFmpeg integration: auto-download script + git optimization",
-    "dirty": true
-  },
-  
-  "dependencies": {
-    "Swift": ["SwiftUI", "UniformTypeIdentifiers", "Foundation", "AppKit"],
-    "Python": ["customtkinter", "subprocess", "threading", "re", "pathlib", "datetime"]
-  },
-  
-  "external_tools": {
-    "ffmpeg": {
-      "version": "N-124032-gfcffc0e1c5",
-      "size_bytes": 63624688,
-      "checksum_md5": "unknown",
-      "source": "https://github.com/BtbN/FFmpeg-Builds/releases/latest",
-      "included_in_bundle": true,
-      "search_paths": ["project_root/ffmpeg", "/usr/local/bin/ffmpeg", "/opt/homebrew/bin/ffmpeg", "/usr/bin/ffmpeg"],
-      "build_phase": "CopyFiles to app bundle",
-      "min_version_note": "Build includes FFmpeg for Apple Silicon (arm64)",
-      "integration": "Auto-download via download-ffmpeg.sh (not stored in git)",
-      "python_uses": "THN-Converter-Python/ffmpeg",
-      "swift_uses": "thn-converter/ffmpeg (copied to bundle)"
+    "project": "THN Converter",
+    "version": "1.0.0",
+    "description": "Video converter macOS app with FFmpeg backend, supporting multiple codecs, frame rates, audio options, and timecode overlay.",
+    "created": "2026-04-22",
+    "last_modified": "2026-04-28",
+    "platform": [
+        "macOS"
+    ],
+    "languages": [
+        "Swift",
+        "Python"
+    ],
+    "frameworks": [
+        "SwiftUI",
+        "UniformTypeIdentifiers",
+        "AppKit",
+        "CustomTkinter"
+    ],
+    "git_state": {
+        "branch": "main",
+        "last_commit": "beb077b",
+        "last_commit_date": "2026-04-28",
+        "last_commit_msg": "Compare Python vs Swift and update JSON with all fixes",
+        "dirty": false
+    },
+    "dependencies": {
+        "Swift": [
+            "SwiftUI",
+            "UniformTypeIdentifiers",
+            "Foundation",
+            "AppKit"
+        ],
+        "Python": [
+            "customtkinter",
+            "subprocess",
+            "threading",
+            "re",
+            "pathlib",
+            "datetime"
+        ]
+    },
+    "external_tools": {
+        "ffmpeg": {
+            "version": "N-124032-gfcffc0e1c5",
+            "size_bytes": 63624688,
+            "checksum_md5": "unknown",
+            "source": "https://github.com/BtbN/FFmpeg-Builds/releases/latest",
+            "included_in_bundle": true,
+            "search_paths": [
+                "project_root/ffmpeg",
+                "/usr/local/bin/ffmpeg",
+                "/opt/homebrew/bin/ffmpeg",
+                "/usr/bin/ffmpeg"
+            ],
+            "build_phase": "CopyFiles to app bundle",
+            "min_version_note": "Build includes FFmpeg for Apple Silicon (arm64)",
+            "integration": "Auto-download via download-ffmpeg.sh (not stored in git)",
+            "python_uses": "THN-Converter-Python/ffmpeg",
+            "swift_uses": "thn-converter/ffmpeg (copied to bundle)"
+        }
+    },
+    "file_metadata": {
+        "source_files": [
+            {
+                "path": "THN-Converter/THN_ConverterApp.swift",
+                "size_bytes": 226,
+                "purpose": "App entry point"
+            },
+            {
+                "path": "THN-Converter/ContentView.swift",
+                "size_bytes": 18884,
+                "purpose": "Main UI with tabs, Cancel button"
+            },
+            {
+                "path": "THN-Converter/VideoConverter.swift",
+                "size_bytes": 9426,
+                "purpose": "FFmpeg wrapper, parseProgress fixed"
+            },
+            {
+                "path": "THN-Converter-Python/thn_converter.py",
+                "size_bytes": "unknown",
+                "purpose": "Python alternative implementation"
+            }
+        ],
+        "config_files": [
+            {
+                "path": "thn-converter/THN-Converter.xcodeproj/project.pbxproj",
+                "size_bytes": "unknown",
+                "purpose": "Xcode project settings"
+            },
+            {
+                "path": "thn-converter/THN-Converter/THN-Converter.entitlements",
+                "size_bytes": 379,
+                "purpose": "Security permissions"
+            }
+        ],
+        "removed_files": [
+            {
+                "path": "THN-Converter/SettingsView.swift",
+                "reason": "Duplicated code, unused"
+            }
+        ]
+    },
+    "project_structure": {
+        "root": [
+            "THN-Converter.xcodeproj/",
+            "THN-Converter/",
+            "THN-Converter-Python/",
+            "LICENSE",
+            "ffmpeg",
+            ".gitignore",
+            "project_structure.json",
+            "update_project_json.sh",
+            "download-ffmpeg.sh",
+            "JSON_GENERATION_PROMPT.md",
+            "escrita/"
+        ],
+        "source_directories": [
+            "THN-Converter/",
+            "THN-Converter-Python/"
+        ],
+        "config_files": [
+            "thn-converter/THN-Converter.xcodeproj/",
+            "THN-Converter/THN-Converter.entitlements"
+        ],
+        "asset_directories": [
+            "THN-Converter/Assets.xcassets/"
+        ]
+    },
+    "build_and_test": {
+        "build_command": "xcodebuild -project thn-converter/THN-Converter.xcodeproj -scheme THN-Converter -configuration Debug build",
+        "test_command": "No automated tests configured",
+        "clean_command": "rm -rf thn-converter/build/ && xcodebuild clean",
+        "run_python_alt": "cd THN-Converter-Python && python3 thn_converter.py",
+        "download_ffmpeg": "./download-ffmpeg.sh (auto-detects architecture, downloads to project root)"
+    },
+    "quick_ref": {
+        "purpose": "macOS video converter with FFmpeg backend",
+        "tech_stack": "SwiftUI + FFmpeg (bundled) / Python + CustomTkinter",
+        "entry_point": "THN-Converter/THN_ConverterApp.swift",
+        "key_files_ordered": [
+            "THN-Converter/THN_ConverterApp.swift",
+            "THN-Converter/ContentView.swift",
+            "THN-Converter/VideoConverter.swift"
+        ]
+    },
+    "file_relationships": {
+        "THN_ConverterApp.swift": [
+            "ContentView.swift"
+        ],
+        "ContentView.swift": [
+            "VideoConverter.swift",
+            "Foundation",
+            "UniformTypeIdentifiers",
+            "currentConverter (VideoConverter?)"
+        ],
+        "VideoConverter.swift": [
+            "Foundation",
+            "AppKit",
+            "ffmpeg (external)",
+            "duration (TimeInterval)"
+        ],
+        "thn_converter.py": [
+            "customtkinter",
+            "subprocess",
+            "ffmpeg (external)"
+        ]
+    },
+    "build_configurations": {
+        "Xcode": {
+            "schemes": [
+                "Debug",
+                "Release"
+            ],
+            "deployment_target": "macOS 14.6",
+            "code_sign": {
+                "identity": "-",
+                "app_sandbox": false,
+                "hardened_runtime": true
+            },
+            "note": "Project level target is 13.0, native target is 14.6 - inconsistency"
+        }
+    },
+    "instructions_for_ai": {
+        "purpose": "Como usar este JSON para modificar o projeto de forma estruturada",
+        "modify_json_rules": [
+            "Sempre mantenha a sintaxe JSON válida (aspas duplas, sem vírgulas finais)",
+            "Ao adicionar feature, atualize: features[], troubleshooting se necessário",
+            "Ao remover arquivo, registre em file_metadata.removed_files",
+            "Atualize last_modified com a data da modificação",
+            "Use status: 'NEW' | 'IN_PROGRESS' | 'COMPLETE' | 'KNOWN_ISSUE'"
+        ],
+        "modification_priority": {
+            "phase_1": "Corrigir bugs críticos (progresso, cancelamento, FFmpeg) - COMPLETE",
+            "phase_2": "Melhorias de UX (font fallback, validação de entrada, erros melhores)",
+            "phase_3": "Refatoração (extrair configurações, testes, internacionalização)",
+            "phase_4": "Otimização (cache, performance, maior tamanho)"
+        },
+        "state_tracking": "Use ai_context para marcar o que já foi feito e o que falta. Sempre atualize last_sync quando modificar uma feature em todas as versões",
+        "safe_modification_workflow": [
+            "1. Ler project_structure.json primeiro - entender o projeto inteiro",
+            "2. Identificar quais arquivos serão afetados via file_relationships",
+            "3. Verificar conventions para manter padrões existentes",
+            "4. Implementar modificação em Swift (principal) e Python (se aplicável)",
+            "5. Atualizar features, troubleshooting e ai_context no JSON",
+            "6. Testar build (Swift) ou rodar app (Python)",
+            "7. Atualizar changelog e last_sync"
+        ],
+        "what_never_to_change": [
+            "ffmpeg search_paths (manter consistentes)",
+            "timecode format (usar gmtime, nunca pts)",
+            "FFmpeg integration (auto-download via script)",
+            "progress calculation (sempre currentTime/duration, nunca divisor fixo)"
+        ]
+    },
+    "conventions": {
+        "naming": {
+            "swift": "camelCase, VideoConverter.swift, mapVideoCodec(), getTimecodeFilter()",
+            "python": "snake_case, thn_converter.py, get_timecode_filter()",
+            "ffmpeg_flags": "Usar -preset, -crf, -c:v, -c:a padrão do FFmpeg"
+        },
+        "structure": {
+            "swift_ui": "TabView com 3 tabs: Principal (drop zone, convert, log), Opções (settings), Log (FFmpeg output)",
+            "ffmpeg_integration": "FFmpeg sempre copiado para bundle via CopyFiles phase, buscado via Bundle.main.path",
+            "progress": "parseDuration() primeiro, depois currentTime/duration (NUNCA divisor fixo)",
+            "timecode": "Usar text='%{gmtime:%H:%M:%S}' em todas as versões, nunca %{pts:HMS}"
+        },
+        "sync_requirement": [
+            "Ao adicionar codec, atualizar: VideoConverter.mapVideoCodec() + ContentView picker + thn_converter codec list",
+            "Ao mexer em timecode, atualizar: Swift getTimecodeFilter() + Python get_timecode_filter()",
+            "Ao mexer em progress, atualizar: Swift parseProgress() + Python duration parsing",
+            "Qualquer bug fix DEVE ser aplicado em ambas as versões (Swift e Python)"
+        ]
+    },
+    "workflow": {
+        "priorities": {
+            "must_fix": "Bugs que quebram a conversão ou travam o app (ex: FFmpeg error, progress frozen)",
+            "should_improve": "UX, validação de entrada, mensagens de erro claras",
+            "nice_to_have": "Refatoração, testes unitários, internacionalização, otimização"
+        },
+        "modification_checklist": {
+            "add_feature": [
+                "Identificar arquivos afetados via file_relationships",
+                "Implementar em Swift (principal) e Python (alternativa)",
+                "Atualizar project_structure.json com nova feature",
+                "Verificar se não quebrou funcionalidade existente",
+                "Atualizar ai_context e changelog"
+            ],
+            "fix_bug": [
+                "Identificar raiz do problema",
+                "Corrigir em ambas as versões (Swift e Python)",
+                "Adicionar a troubleshooting com status 'FIXED'",
+                "Testar build (Swift) ou rodar (Python) antes de commit",
+                "Atualizar changelog e last_sync"
+            ],
+            "refactor": [
+                "Identificar escopo e impacto",
+                "Manter API pública inalterada",
+                "Verificar se ambas as versões ficam consistentes",
+                "Testar fluxo completo de conversão após refatoração"
+            ]
+        },
+        "validation_steps": [
+            "Build passou em Xcode?",
+            "App Python rodou sem erros?",
+            "ffmpeg está disponível no bundle?",
+            "Conversão funciona em todos os codecs? Testar cada um?",
+            "Timecode overlay aparece no vídeo?",
+            "Cancelamento funciona?",
+            "project_structure.json atualizado com mudanças?"
+        ]
+    },
+    "sync_rules": {
+        "when_to_sync": "Quando qualquer funcionalidade for adicionada ou modificada, aplicar em Swift e Python",
+        "sync_checklist": [
+            "Swift e Python têm os mesmos codecs mapeados?",
+            "Swift e Python têm o mesmo parseProgress()?",
+            "Swift e Python usam o mesmo timecode format?",
+            "Swift e Python têm os mesmos erros documentados?",
+            "Swift e Python têm a mesma UI behavior?"
+        ],
+        "ffmpeg": "Sempre manter ffmpeg auto-download funcionando em ambas as versões",
+        "timecode_format": "Usar text='%{gmtime:%H:%M:%S}' em todas as versões (nunca %{pts:HMS})",
+        "progress_calculation": "Usar currentTime/duration (NUNCA divisor fixo de 36000)"
+    },
+    "validation_rules": {
+        "json_validity": [
+            "Validar com: python3 -m json.tool project_structure.json",
+            "Não usar vírgulas finais em arrays ou objetos",
+            "Usar aspas duplas em chaves e valores",
+            "Arrays e objetos devem estar fechados corretamente"
+        ],
+        "project_consistency": [
+            "Se adicionar codec: verificar VideoConverter.mapVideoCodec()",
+            "Se mexer em FFmpeg: verificar download-ffmpeg.sh e .gitignore",
+            "Se mexer em progress: verificar parseProgress() em ambas as versões",
+            "Se mexer em timecode: verificar getTimecodeFilter() em ambas as versões"
+        ],
+        "pre_commit_checklist": [
+            "Build passou em Xcode?",
+            "Python app roda sem erros?",
+            "ffmpeg está disponível (local ou bundle)?",
+            "project_structure.json foi atualizado?",
+            "Changelog refletiu todas as mudanças?",
+            "Commits têm mensagens claras e descritivas?"
+        ]
+    },
+    "changelog": {
+        "current_phase": "Phase-1 COMPLETE (build fixes, cancel, FFmpeg auto-download)",
+        "next_phase": "Phase-2 (font fallback, input validation, better error messages)",
+        "ffmpeg_version": "N-124032-gfcffc0e1c5",
+        "last_sync": "2026-04-28",
+        "synced_status": "Swift e Python alinhados: parseProgress, timecode, cancel, codecs"
+    },
+    "features": {
+        "video_codec": [
+            "libx264",
+            "libx265",
+            "prores_ks",
+            "dnxhd",
+            "vp9",
+            "mpeg4"
+        ],
+        "audio_codec": [
+            "copy",
+            "aac",
+            "mp3",
+            "opus",
+            "vorbis",
+            "flac",
+            "pcm"
+        ],
+        "resolution": [
+            "Original",
+            "3840x2160",
+            "1920x1080",
+            "1280x720",
+            "854x480"
+        ],
+        "framerate": [
+            "Original",
+            "60",
+            "59.94",
+            "30",
+            "29.97",
+            "24",
+            "23.976"
+        ],
+        "timecode_overlay": true,
+        "timecode_position": [
+            "top-left",
+            "top-center",
+            "top-right",
+            "bottom-left",
+            "bottom-center",
+            "bottom-right"
+        ],
+        "cancel_conversion": true,
+        "auto_ffmpeg_download": true,
+        "dynamic_progress": true
+    },
+    "troubleshooting": [
+        {
+            "error_pattern": "FFmpeg failed with status 234",
+            "cause": "Permission denied or remote I/O error on macOS, often related to sandbox or output path",
+            "solution": "Check write permissions with FileManager.isWritableFile, ensure output directory exists, verify selected path is writable",
+            "files_to_check": [
+                "VideoConverter.swift"
+            ],
+            "code_location": "VideoConverter.swift line ~161-170"
+        },
+        {
+            "error_pattern": "parsedrawtext invalid format HMS",
+            "cause": "Wrong timecode format - using wrong syntax",
+            "solution": "Use gmtime format: text='%{gmtime:%H:%M:%S}' in getTimecodeFilter()",
+            "files_to_check": [
+                "VideoConverter.swift",
+                "thn_converter.py"
+            ],
+            "code_location": "VideoConverter.swift getTimecodeFilter() / thn_converter.py get_timecode_filter()",
+            "status": "FIXED in Phase-1"
+        },
+        {
+            "error_pattern": "font file not found",
+            "cause": "Wrong font path - /System/Library/Fonts/Helvetica.ttc may not exist on all macOS versions",
+            "solution": "Use fallback fonts or verify path exists with FileManager",
+            "files_to_check": [
+                "VideoConverter.swift"
+            ],
+            "code_location": "VideoConverter.swift getTimecodeFilter() line ~178",
+            "status": "KNOWN_ISSUE"
+        },
+        {
+            "error_pattern": "Progress stuck at 10%",
+            "cause": "Fixed divisor of 36000 (10 hours) in parseProgress()",
+            "solution": "Parse Duration from FFmpeg output first, then calculate progress as currentTime/duration",
+            "files_to_check": [
+                "VideoConverter.swift"
+            ],
+            "code_location": "VideoConverter.swift parseProgress() line ~200-230",
+            "status": "FIXED in Phase-1"
+        },
+        {
+            "error_pattern": "Large files detected (ffmpeg)",
+            "cause": "63MB ffmpeg binary was being tracked in git",
+            "solution": "Removed from git tracking, added auto-download script (download-ffmpeg.sh), .gitignore updated",
+            "files_to_check": [
+                ".gitignore",
+                "download-ffmpeg.sh"
+            ],
+            "status": "FIXED in Phase-1"
+        }
+    ],
+    "known_issues": [
+        "Font path /System/Library/Fonts/Helvetica.ttc may not exist on all macOS versions",
+        "Build target inconsistency: Project level 13.0 vs Native target 14.6"
+    ],
+    "ai_context": {
+        "quick_summary": "macOS video converter with FFmpeg bundled, SwiftUI frontend, supports multiple codecs and timecode overlay. Phase-1 COMPLETE. JSON includes AI instructions, conventions, sync rules, and workflow guidelines for future modifications.",
+        "read_order": [
+            "project_structure.json (this file)",
+            "THN-Converter/THN_ConverterApp.swift",
+            "THN-Converter/ContentView.swift",
+            "THN-Converter/VideoConverter.swift"
+        ],
+        "skip_files_over": 10000,
+        "key_files": {
+            "entry_point": "THN-Converter/THN_ConverterApp.swift",
+            "video_logic": "THN-Converter/VideoConverter.swift",
+            "ui": "THN-Converter/ContentView.swift (has Cancel button)",
+            "python_alt": "THN-Converter-Python/thn_converter.py"
+        },
+        "common_tasks": {
+            "add_codec": {
+                "where": "VideoConverter.swift mapVideoCodec() + ContentView.swift picker + thn_converter codec list",
+                "how": "Add to features.video_codec array, mapVideoCodec() switch, and Python codec list. Verify sync across both implementations."
+            },
+            "fix_timecode": {
+                "where": "VideoConverter.swift getTimecodeFilter() + thn_converter.py get_timecode_filter()",
+                "how": "Use text='%{gmtime:%H:%M:%S}' format in both implementations. Verify font path exists.",
+                "status": "FIXED"
+            },
+            "update_ffmpeg": {
+                "where": "project root",
+                "how": "Run download-ffmpeg.sh or replace ffmpeg binary and update JSON version/size"
+            },
+            "fix_progress": {
+                "where": "VideoConverter.swift parseProgress() + thn_converter.py duration parsing",
+                "how": "Parse Duration from FFmpeg output, calculate as currentTime/duration. Never use fixed divisor.",
+                "status": "FIXED"
+            },
+            "add_cancel": {
+                "where": "ContentView.swift cancelConversion()",
+                "how": "Add Cancel button to UI, currentConverter property, and terminate() on VideoConverter",
+                "status": "FIXED"
+            }
+        },
+        "update_script": "update_project_json.sh",
+        "last_phase": "Phase-1",
+        "next_actions": [
+            "Phase-2: Font fallback for timecode (check font exists, use fallback)",
+            "Phase-2: Input validation (file size limit, valid codec check)",
+            "Phase-2: Error handling improvements (better FFmpeg error parsing)"
+        ]
     }
-  },
-  
-  "file_metadata": {
-    "source_files": [
-      {"path": "THN-Converter/THN_ConverterApp.swift", "size_bytes": 226, "purpose": "App entry point"},
-      {"path": "THN-Converter/ContentView.swift", "size_bytes": 18884, "purpose": "Main UI with tabs, Cancel button added"},
-      {"path": "THN-Converter/VideoConverter.swift", "size_bytes": 9426, "purpose": "FFmpeg wrapper, parseProgress() fixed"},
-      {"path": "THN-Converter-Python/thn_converter.py", "size_bytes": "unknown", "purpose": "Python alternative implementation"}
-    ],
-    "config_files": [
-      {"path": "thn-converter/THN-Converter.xcodeproj/project.pbxproj", "size_bytes": "unknown", "purpose": "Xcode project settings"},
-      {"path": "thn-converter/THN-Converter/THN-Converter.entitlements", "size_bytes": 379, "purpose": "Security permissions"}
-    ],
-    "removed_files": [
-      {"path": "THN-Converter/SettingsView.swift", "reason": "Duplicated code, unused"}
-    ]
-  },
-  
-  "project_structure": {
-    "root": [
-      "THN-Converter.xcodeproj/",
-      "THN-Converter/",
-      "THN-Converter-Python/",
-      "LICENSE",
-      "ffmpeg",
-      ".gitignore",
-      "project_structure.json",
-      "update_project_json.sh",
-      "download-ffmpeg.sh",
-      "JSON_GENERATION_PROMPT.md",
-      "escrita/"
-    ],
-    "source_directories": ["THN-Converter/", "THN-Converter-Python/"],
-    "config_files": ["thn-converter/THN-Converter.xcodeproj/", "THN-Converter/THN-Converter.entitlements"],
-    "asset_directories": ["THN-Converter/Assets.xcassets/"]
-  },
-  
-  "build_and_test": {
-    "build_command": "xcodebuild -project thn-converter/THN-Converter.xcodeproj -scheme THN-Converter -configuration Debug build",
-    "test_command": "No automated tests configured",
-    "clean_command": "rm -rf thn-converter/build/ && xcodebuild clean",
-    "run_python_alt": "cd THN-Converter-Python && python3 thn_converter.py",
-    "download_ffmpeg": "./download-ffmpeg.sh (auto-detects architecture, downloads to project root)"
-  },
-  
-  "quick_ref": {
-    "purpose": "macOS video converter with FFmpeg backend",
-    "tech_stack": "SwiftUI + FFmpeg (bundled) / Python + CustomTkinter",
-    "entry_point": "THN-Converter/THN_ConverterApp.swift",
-    "key_files_ordered": [
-      "THN-Converter/THN_ConverterApp.swift",
-      "THN-Converter/ContentView.swift",
-      "THN-Converter/VideoConverter.swift"
-    ]
-  },
-  
-  "file_relationships": {
-    "THN_ConverterApp.swift": ["ContentView.swift"],
-    "ContentView.swift": ["VideoConverter.swift", "Foundation", "UniformTypeIdentifiers", "currentConverter (VideoConverter?)"],
-    "VideoConverter.swift": ["Foundation", "AppKit", "ffmpeg (external)", "duration (TimeInterval)"],
-    "thn_converter.py": ["customtkinter", "subprocess", "ffmpeg (external)"]
-  },
-  
-  "build_configurations": {
-    "Xcode": {
-      "schemes": ["Debug", "Release"],
-      "deployment_target": "macOS 14.6",
-      "code_sign": {
-        "identity": "-",
-        "app_sandbox": false,
-        "hardened_runtime": true
-      },
-      "note": "Project level target is 13.0, but native target is 14.6 - inconsistency"
-    }
-  },
-  
-  "features": {
-    "video_codec": ["libx264", "libx265", "prores_ks", "dnxhd", "vp9", "mpeg4"],
-    "audio_codec": ["copy", "aac", "mp3", "opus", "vorbis", "flac", "pcm"],
-    "resolution": ["Original", "3840x2160", "1920x1080", "1280x720", "854x480"],
-    "framerate": ["Original", "60", "59.94", "30", "29.97", "24", "23.976"],
-    "timecode_overlay": true,
-    "timecode_position": ["top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right"]
-  },
-  
-  "troubleshooting": [
-    {
-      "error_pattern": "FFmpeg failed with status 234",
-      "cause": "Permission denied or remote I/O error on macOS, often related to sandbox or output path",
-      "solution": "Check write permissions with FileManager.isWritableFile, ensure output directory exists, verify selected path is writable",
-      "files_to_check": ["VideoConverter.swift"],
-      "code_location": "VideoConverter.swift line ~161-170"
-    },
-    {
-      "error_pattern": "parsedrawtext invalid format HMS",
-      "cause": "Wrong timecode format - using wrong syntax",
-      "solution": "Use gmtime format: text='%{gmtime:%H:%M:%S}' in getTimecodeFilter()",
-      "files_to_check": ["VideoConverter.swift", "thn_converter.py"],
-      "code_location": "VideoConverter.swift getTimecodeFilter() / thn_converter.py get_timecode_filter()"
-    },
-    {
-      "error_pattern": "font file not found",
-      "cause": "Wrong font path - /System/Library/Fonts/Helvetica.ttc may not exist on all macOS versions",
-      "solution": "Use fallback fonts or verify path exists with FileManager",
-      "files_to_check": ["VideoConverter.swift"],
-      "code_location": "VideoConverter.swift getTimecodeFilter() line ~178"
-    },
-    {
-      "error_pattern": "Progress stuck at 10%",
-      "cause": "Fixed divisor of 36000 (10 hours) in parseProgress() - FIXED in Swift",
-      "solution": "Swift now uses Duration from FFmpeg output like Python does. Parse duration first, then calculate progress as currentTime/duration",
-      "files_to_check": ["VideoConverter.swift"],
-      "code_location": "VideoConverter.swift parseProgress() line ~200-230",
-      "status": "FIXED in Phase-1"
-    },
-    {
-      "error_pattern": "Large files detected (ffmpeg)",
-      "cause": "63MB ffmpeg binary was being tracked in git",
-      "solution": "FIXED: Removed from git tracking, added auto-download script (download-ffmpeg.sh), .gitignore updated",
-      "files_to_check": [".gitignore", "download-ffmpeg.sh"],
-      "status": "FIXED - ffmpeg auto-downloads during build"
-    }
-  ],
-  
-  "known_issues": [
-    "Font path /System/Library/Fonts/Helvetica.ttc may not exist on all macOS versions",
-    "Build target inconsistency: Project level 13.0 vs Native target 14.6"
-  ],
-  
-  "ai_context": {
-    "quick_summary": "macOS video converter with FFmpeg bundled, SwiftUI frontend, supports multiple codecs and timecode overlay. Phase-1 fixes applied.",
-    "read_order": [
-      "project_structure.json (this file)",
-      "THN-Converter/THN_ConverterApp.swift",
-      "THN-Converter/ContentView.swift",
-      "THN-Converter/VideoConverter.swift"
-    ],
-    "skip_files_over": 10000,
-    "key_files": {
-      "entry_point": "THN-Converter/THN_ConverterApp.swift",
-      "video_logic": "THN-Converter/VideoConverter.swift",
-      "ui": "THN-Converter/ContentView.swift (has Cancel button now)",
-      "python_alt": "THN-Converter-Python/thn_converter.py"
-    },
-    "common_tasks": {
-      "add_codec": {"where": "VideoConverter.swift mapVideoCodec() + ContentView.swift picker", "how": "Add to video_codec array and mapVideoCodec() switch"},
-      "fix_timecode": {"where": "VideoConverter.swift getTimecodeFilter()", "how": "Use correct gmtime format and verify font path"},
-      "update_ffmpeg": {"where": "project root", "how": "Run download-ffmpeg.sh or replace ffmpeg binary and update JSON version/size"},
-      "fix_progress": {"where": "VideoConverter.swift parseProgress()", "how": "FIXED: Now parses Duration from FFmpeg output like Python", "status": "COMPLETE"},
-      "add_cancel": {"where": "ContentView.swift", "how": "FIXED: Added Cancel button and cancelConversion() function", "status": "COMPLETE"}
-    },
-    "update_script": "update_project_json.sh"
-  }
 }
