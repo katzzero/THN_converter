@@ -10,8 +10,7 @@ struct ContentView: View {
     @State private var logOutput = ""
     
     @State private var outputURL: URL?
-    @State private var showingFilePicker = false
-    @State private var logScrollOffset: CGFloat = 0
+    @State private var currentConverter: VideoConverter?
     
     // Video settings
     @State private var selectedVideoCodec = "H.264"
@@ -113,20 +112,37 @@ struct ContentView: View {
                 }
                 .padding(.horizontal)
                 
-                // Convert button
-                Button(action: convertVideo) {
-                    HStack {
-                        Image(systemName: isConverting ? "arrow.triangle.2.circlepath" : "arrow.down.circle")
-                        Text(isConverting ? "Convertendo..." : "Converter")
-                            .font(.headline)
+                // Convert/Cancel buttons
+                HStack(spacing: 10) {
+                    if isConverting {
+                        Button(action: cancelConversion) {
+                            HStack {
+                                Image(systemName: "stop.circle")
+                                Text("Cancelar")
+                                    .font(.headline)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                        }
+                    } else {
+                        Button(action: convertVideo) {
+                            HStack {
+                                Image(systemName: "arrow.down.circle")
+                                Text("Converter")
+                                    .font(.headline)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                        }
+                        .disabled(droppedFileURL == nil)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(isConverting ? Color.gray : Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
                 }
-                .disabled(droppedFileURL == nil || isConverting)
                 
                 Spacer()
             }
@@ -363,7 +379,7 @@ struct ContentView: View {
         
         Task {
             do {
-                let converter = VideoConverter()
+                currentConverter = VideoConverter()
                 
                 let finalOutputURL: URL
                 if let fileURL = outputURL {
@@ -379,6 +395,48 @@ struct ContentView: View {
                     
                     outputURL = finalOutputURL
                 }
+                
+                let settings = ConversionSettings(
+                    videoCodec: mapVideoCodec(selectedVideoCodec),
+                    quality: selectedQuality,
+                    resolution: selectedResolution,
+                    framerate: selectedFramerate,
+                    audioCodec: selectedAudioCodec,
+                    audioBitrate: selectedAudioBitrate,
+                    audioSampleRate: selectedAudioSampleRate,
+                    addTimecode: showTimecode,
+                    timecodePosition: timecodePosition,
+                    outputPath: finalOutputURL.path
+                )
+                
+                try await currentConverter!.convert(
+                    inputURL: inputURL,
+                    settings: settings,
+                    onProgress: { progress in
+                        DispatchQueue.main.async {
+                            conversionProgress = progress
+                        }
+                    },
+                    onOutput: { output in
+                        DispatchQueue.main.async {
+                            logOutput.append(output)
+                        }
+                    }
+                )
+                
+                DispatchQueue.main.async {
+                    statusMessage = "✅ Conversão concluída!"
+                    isConverting = false
+                    currentConverter = nil
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    statusMessage = "❌ Erro: \(error.localizedDescription)"
+                    isConverting = false
+                    currentConverter = nil
+                }
+            }
+        }
                 
                 let settings = ConversionSettings(
                     videoCodec: mapVideoCodec(selectedVideoCodec),
@@ -414,11 +472,18 @@ struct ContentView: View {
                 }
             } catch {
                 DispatchQueue.main.async {
-                    statusMessage = "❌ Erro: \(error.localizedDescription)"
+                    statusMessage = "❌ Conversão cancelada!"
                     isConverting = false
                 }
             }
         }
+    }
+    
+    private func cancelConversion() {
+        let converter = VideoConverter()
+        converter.cancel()
+        isConverting = false
+        statusMessage = "❌ Conversão cancelada"
     }
     
     private func mapVideoCodec(_ codec: String) -> String {

@@ -16,6 +16,7 @@ struct ConversionSettings {
 
 class VideoConverter: ObservableObject {
     private var process: Process?
+    private var duration: TimeInterval = 0
     
     func convert(
         inputURL: URL,
@@ -136,10 +137,6 @@ class VideoConverter: ObservableObject {
         
         let errPipe = Pipe()
         process?.standardError = errPipe
-        let outPipe = Pipe()
-        process?.standardOutput = outPipe
-        
-        try process?.run()
         
         errPipe.fileHandleForReading.readabilityHandler = { fileHandle in
             let data = fileHandle.availableData
@@ -148,6 +145,13 @@ class VideoConverter: ObservableObject {
                 onOutput("[ERROR] " + line)
             }
         }
+        
+        let outPipe = Pipe()
+        process?.standardOutput = outPipe
+        
+        try process?.run()
+        
+        duration = 0  // Reset duration
         
         outPipe.fileHandleForReading.readabilityHandler = { fileHandle in
             let data = fileHandle.availableData
@@ -168,6 +172,37 @@ class VideoConverter: ObservableObject {
             let errorMsg = "FFmpeg falhou com código \(exitCode). Verifique se o caminho de saída é válido e tem permissões de escrita."
             onOutput("\n❌ Erro: \(errorMsg)\n")
             throw NSError(domain: "VideoConverter", code: Int(exitCode), userInfo: [NSLocalizedDescriptionKey: errorMsg])
+        }
+    }
+    
+    private func parseProgress(_ line: String, onProgress: @escaping (Double) -> Void) {
+        // Parse Duration from FFmpeg output (like Python does)
+        if duration == 0 && line.contains("Duration:") {
+            let parts = line.components(separatedBy: "Duration: ")[1].components(separatedBy: ",")[0]
+            let timeParts = parts.components(separatedBy: ":")
+            if timeParts.count >= 3 {
+                if let h = Double(timeParts[0]), let m = Double(timeParts[1]) {
+                    let s = Double(timeParts[2]) ?? 0
+                    duration = h * 3600 + m * 60 + s
+                }
+            }
+        }
+        
+        // Parse current time and calculate progress
+        if line.contains("time=") {
+            let components = line.components(separatedBy: "time=")
+            if components.count > 1 {
+                let timeComponent = components[1].components(separatedBy: " ")[0]
+                let timeParts = timeComponent.components(separatedBy: ":")
+                if timeParts.count == 3 {
+                    if let h = Double(timeParts[0]), let m = Double(timeParts[1]), let s = Double(timeParts[2]) {
+                        let currentTime = h * 3600 + m * 60 + s
+                        if duration > 0 {
+                            onProgress(min(currentTime / duration, 1.0))
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -192,22 +227,6 @@ class VideoConverter: ObservableObject {
             return "drawtext=text='\\%{gmtime\\:%H:%M:%S}':fontfile=\(fontPath):fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=w-tw-10:y=h-th-10"
         default:
             return "drawtext=text='\\%{gmtime\\:%H:%M:%S}':fontfile=\(fontPath):fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=(w-tw)/2:y=h-th-10"
-        }
-    }
-    
-    private func parseProgress(_ line: String, onProgress: @escaping (Double) -> Void) {
-        if line.contains("time=") {
-            let components = line.components(separatedBy: "time=")
-            if components.count > 1 {
-                let timeComponent = components[1].components(separatedBy: " ")[0]
-                let timeParts = timeComponent.components(separatedBy: ":")
-                if timeParts.count == 3 {
-                    if let h = Double(timeParts[0]), let m = Double(timeParts[1]), let s = Double(timeParts[2]) {
-                        let currentTime = h * 3600 + m * 60 + s
-                        onProgress(currentTime / 36000)
-                    }
-                }
-            }
         }
     }
     
