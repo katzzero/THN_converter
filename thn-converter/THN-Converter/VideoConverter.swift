@@ -1,6 +1,12 @@
 import Foundation
 import AppKit
 
+extension Array {
+    public func safeIndex(_ index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
+
 struct ConversionSettings {
     let videoCodec: String
     let quality: String
@@ -12,6 +18,68 @@ struct ConversionSettings {
     let addTimecode: Bool
     let timecodePosition: String
     let outputPath: String
+}
+
+struct VideoMetadata {
+    var filename: String
+    var duration: TimeInterval = 0
+    var bitrate: Int?
+    var container: String?
+    var videoStreams: [VideoStreamInfo] = []
+    var audioStreams: [AudioStreamInfo] = []
+    var subtitleStreams: [SubtitleStreamInfo] = []
+    var dataStreams: [DataStreamInfo] = []
+    var timecode: String?
+    var colorSpaceInfo: ColorSpaceInfo?
+    var extras: [String: String] = [:]
+    var error: String?
+}
+
+struct VideoStreamInfo {
+    var index: Int
+    var codec: String
+    var profile: String
+    var resolution: String
+    var pixelFormat: String
+    var frameRate: String
+    var bitrate: Int?
+    var sar: String
+    var dar: String
+    var colorRange: String?
+    var colorSpace: String?
+    var colorPrimaries: String?
+    var colorTransfer: String?
+    var isHDR: Bool = false
+}
+
+struct AudioStreamInfo {
+    var index: Int
+    var codec: String
+    var sampleRate: Int
+    var channels: String
+    var bitrate: Int?
+    var language: String?
+}
+
+struct SubtitleStreamInfo {
+    var index: Int
+    var codec: String
+    var language: String?
+}
+
+struct DataStreamInfo {
+    var index: Int
+    var type: String
+    var codec: String?
+}
+
+struct ColorSpaceInfo {
+    var range: String
+    var space: String
+    var primaries: String
+    var transfer: String
+    var isHDR: Bool
+    var hdrFormat: String?
 }
 
 class VideoConverter: ObservableObject {
@@ -204,6 +272,343 @@ class VideoConverter: ObservableObject {
                 }
             }
         }
+    }
+    
+    func extractMetadata(from inputURL: URL) async throws -> VideoMetadata {
+        return try await withCheckedThrowingContinuation { continuation in
+            let process = Process()
+            let pipe = Pipe()
+            
+            process.executableURL = URL(fileURLWithPath: findFFmpeg())
+            process.arguments = ["-i", inputURL.path]
+            process.standardOutput = pipe
+            process.standardError = pipe
+            
+            var output = ""
+            
+            let pipeData = pipe.fileHandleForReading
+            pipeData.readabilityHandler = { pipeData in
+                let data = pipeData.availableData
+                if let line = String(data: data, encoding: .utf8) {
+                    output += line
+                }
+            }
+            
+            process.terminationHandler = { process in
+                pipe.fileHandleForReading.readabilityHandler = nil
+                
+                let metadata = self.parseFFmpegMetadata(output, filename: inputURL.lastPathComponent)
+                continuation.resume(returning: metadata)
+            }
+            
+            try? process.run()
+        }
+    }
+    
+    private func parseFFmpegMetadata(_ output: String, filename: String) -> VideoMetadata {
+        var metadata = VideoMetadata(filename: filename)
+        let lines = output.components(separatedBy: .newlines)
+        
+        for line in lines {
+            if line.contains("Duration:") {
+                if let durationStr = line.components(separatedBy: "Duration: ").safeIndex(1)?.components(separatedBy: ",")[0] {
+                    metadata.duration = parseDuration(durationStr)
+                }
+                if let bitrateStr = line.components(separatedBy: "bitrate: ").safeIndex(1)?.components(separatedBy: " ")[0] {
+                    metadata.bitrate = Int(bitrateStr)
+                }
+            }
+            
+            if line.contains("Input #0,") {
+                let containerParts = line.components(separatedBy: "Input #0, ")
+                if containerParts.count > 1 {
+                    metadata.container = containerParts[1].components(separatedBy: ",")[0].trimmingCharacters(in: .whitespaces)
+                }
+            }
+            
+            if line.contains("Stream #0:") {
+                if line.contains("Video:") {
+                    if let streamInfo = parseVideoStream(line) {
+                        metadata.videoStreams.append(streamInfo)
+                    }
+                } else if line.contains("Audio:") {
+                    if let streamInfo = parseAudioStream(line) {
+                        metadata.audioStreams.append(streamInfo)
+                    }
+                } else if line.contains("Subtitle:") {
+                    if let streamInfo = parseSubtitleStream(line) {
+                        metadata.subtitleStreams.append(streamInfo)
+                    }
+                } else if line.contains("Data:") {
+                    if let streamInfo = parseDataStream(line) {
+                        metadata.dataStreams.append(streamInfo)
+                    }
+                }
+            }
+            
+            _ = line.contains("timecode") && line.contains(":")
+        }
+        
+        if !metadata.videoStreams.isEmpty {
+            if let firstVideo = metadata.videoStreams.first {
+                if let streamLine = lines.first(where: { $0.contains("Stream #0:") && $0.contains("Video:") && ($0.contains(firstVideo.codec)) }) {
+                    if let timecodeMatch = streamLine.range(of: "timecode\\s*:\\s*([\\d:;]+)", options: .regularExpression) {
+                        metadata.timecode = String(streamLine[timecodeMatch]).trimmingCharacters(in: .whitespaces)
+                    }
+                }
+            }
+        }
+        
+        metadata.colorSpaceInfo = extractColorSpaceInfo(lines)
+        
+        return metadata
+    }
+    
+    private func parseDuration(_ durationStr: String) -> TimeInterval {
+        let parts = durationStr.components(separatedBy: ":")
+        guard parts.count >= 3 else { return 0 }
+        
+        let h = Double(parts[0]) ?? 0
+        let m = Double(parts[1]) ?? 0
+        let s = Double(parts[2]) ?? 0
+        
+        return h * 3600 + m * 60 + s
+    }
+    
+    private func parseVideoStream(_ line: String) -> VideoStreamInfo? {
+        var info = VideoStreamInfo(index: 0, codec: "", profile: "", resolution: "", pixelFormat: "", frameRate: "", bitrate: nil, sar: "N/A", dar: "N/A")
+        
+        let indexPattern = "Stream #0:(\\d+)"
+        if let range = line.range(of: indexPattern, options: .regularExpression) {
+            let extracted = String(line[range])
+            if let numStr = Int(extracted.components(separatedBy: ":").last!) {
+                info.index = numStr
+            }
+        }
+        
+        let codecPattern = "Video: ([a-z0-9]+)"
+        if let range = line.range(of: codecPattern, options: .regularExpression) {
+            let extracted = String(line[range])
+            info.codec = extracted.components(separatedBy: "Video: ").last ?? ""
+        }
+        
+        if let openParen = line.range(of: "\\("), let closeParen = line.range(of: "\\)") {
+            let profileStart = line.index(openParen.upperBound, offsetBy: 0)
+            let profileEnd = line.index(closeParen.lowerBound, offsetBy: 0)
+            info.profile = String(line[profileStart..<profileEnd]).trimmingCharacters(in: .whitespaces)
+        }
+        
+        let resPattern = "(\\d+)x(\\d+)"
+        if let range = line.range(of: resPattern, options: .regularExpression) {
+            let extracted = String(line[range])
+            info.resolution = extracted
+        }
+        
+        let pixelPattern = "([a-z0-9]+)(?:\\([^)]+\\))?"
+        if let range = line.range(of: pixelPattern, options: .regularExpression) {
+            let extracted = String(line[range]).trimmingCharacters(in: .whitespaces)
+            if !extracted.isEmpty && extracted != "," {
+                info.pixelFormat = extracted
+            }
+        }
+        
+        if line.contains(" fps") {
+            let parts = line.components(separatedBy: " fps")
+            if let rateStr = parts.first?.components(separatedBy: " ").last {
+                info.frameRate = rateStr.trimmingCharacters(in: .whitespaces) + " fps"
+            }
+        }
+        
+        let bitratePattern = "(\\d+) kb/s"
+        if let range = line.range(of: bitratePattern, options: .regularExpression) {
+            let extracted = String(line[range]).components(separatedBy: " ")[0]
+            info.bitrate = Int(extracted)
+        }
+        
+        let sarPattern = "SAR (\\d+):(\\d+)"
+        if let range = line.range(of: sarPattern, options: .regularExpression) {
+            let extracted = String(line[range]).components(separatedBy: "SAR ").last!
+            info.sar = extracted
+        } else {
+            info.sar = "N/A"
+        }
+        
+        let darPattern = "DAR (\\d+):(\\d+)"
+        if let range = line.range(of: darPattern, options: .regularExpression) {
+            let extracted = String(line[range]).components(separatedBy: "DAR ").last!
+            info.dar = extracted
+        } else {
+            info.dar = "N/A"
+        }
+        
+        let colorPattern = "(tv|pc), (\\w{2,6})"
+        if let range = line.range(of: colorPattern, options: .regularExpression) {
+            let extracted = String(line[range])
+            let parts = extracted.components(separatedBy: ", ")
+            if parts.count >= 2 {
+                info.colorRange = parts[0]
+                info.colorSpace = parts[1]
+            }
+        }
+        
+        let primariesPattern = "(bt709|bt2020|smpte431|smpte432|bt601)"
+        if let range = line.range(of: primariesPattern, options: .regularExpression) {
+            info.colorPrimaries = String(line[range])
+        }
+        
+        let transferPattern = "(bt709|smpte2084|hlg)"
+        if let range = line.range(of: transferPattern, options: .regularExpression) {
+            info.colorTransfer = String(line[range])
+        }
+        
+        if info.colorTransfer == "smpte2084" || info.colorTransfer == "hlg" || info.colorPrimaries == "smpte431" || info.colorPrimaries == "smpte432" {
+            info.isHDR = true
+        }
+        
+        return info
+    }
+    
+    private func parseAudioStream(_ line: String) -> AudioStreamInfo? {
+        var info = AudioStreamInfo(index: 0, codec: "", sampleRate: 0, channels: "", bitrate: nil)
+        
+        let indexPattern = "Stream #0:(\\d+)"
+        if let range = line.range(of: indexPattern, options: .regularExpression) {
+            let extracted = String(line[range])
+            if let numStr = Int(extracted.components(separatedBy: ":").last!) {
+                info.index = numStr
+            }
+        }
+        
+        let codecPattern = "Audio: ([a-z0-9]+)"
+        if let range = line.range(of: codecPattern, options: .regularExpression) {
+            let extracted = String(line[range])
+            info.codec = extracted.components(separatedBy: "Audio: ").last ?? ""
+        }
+        
+        let sampleRatePattern = "(\\d+) Hz"
+        if let range = line.range(of: sampleRatePattern, options: .regularExpression) {
+            let extracted = String(line[range]).components(separatedBy: " Hz")[0]
+            info.sampleRate = Int(extracted) ?? 0
+        }
+        
+        let channelsPattern = "mono|stereo|5\\.1|5\\.1\\(|6 channels|8 channels"
+        if let range = line.range(of: channelsPattern, options: .regularExpression) {
+            info.channels = String(line[range])
+        } else {
+            info.channels = "mono"
+        }
+        
+        let bitratePattern = "(\\d+) kb/s"
+        if let range = line.range(of: bitratePattern, options: .regularExpression) {
+            let extracted = String(line[range]).components(separatedBy: " ")[0]
+            info.bitrate = Int(extracted)
+        }
+        
+        if line.contains("und)") {
+            info.language = "und"
+        } else if let langMatch = line.range(of: "\\(([a-z]{3})\\)", options: .regularExpression) {
+            let langString = String(line[langMatch])
+            let trimmed = String(langString[langString.index(langString.startIndex, offsetBy: 1)..<langString.index(langString.endIndex, offsetBy: -1)])
+            info.language = trimmed
+        }
+        
+        return info
+    }
+    
+    private func parseSubtitleStream(_ line: String) -> SubtitleStreamInfo? {
+        var info = SubtitleStreamInfo(index: 0, codec: "", language: nil)
+        
+        let indexPattern = "Stream #0:(\\d+)"
+        if let range = line.range(of: indexPattern, options: .regularExpression) {
+            let extracted = String(line[range])
+            if let numStr = Int(extracted.components(separatedBy: ":").last!) {
+                info.index = numStr
+            }
+        }
+        
+        let codecPattern = "Subtitle: ([a-z0-9_]+)"
+        if let range = line.range(of: codecPattern, options: .regularExpression) {
+            let extracted = String(line[range])
+            info.codec = extracted.components(separatedBy: "Subtitle: ").last ?? ""
+        }
+        
+        if line.contains("und)") {
+            info.language = "und"
+        }
+        
+        return info
+    }
+    
+    private func parseDataStream(_ line: String) -> DataStreamInfo? {
+        var info = DataStreamInfo(index: 0, type: "", codec: nil)
+        
+        let indexPattern = "Stream #0:(\\d+)"
+        if let range = line.range(of: indexPattern, options: .regularExpression) {
+            let extracted = String(line[range])
+            if let numStr = Int(extracted.components(separatedBy: ":").last!) {
+                info.index = numStr
+            }
+        }
+        
+        let typePattern = "Data: ([a-z0-9_]+)"
+        if let range = line.range(of: typePattern, options: .regularExpression) {
+            let extracted = String(line[range])
+            info.type = extracted.components(separatedBy: "Data: ").last ?? ""
+            info.codec = (extracted.components(separatedBy: "Data: ").last ?? "") != "none" ? String(extracted.components(separatedBy: "Data: ").last!) : nil
+        }
+        
+        if line.contains("tmcd") {
+            info.type = "tmcd"
+        } else if line.contains("timecode") {
+            info.type = "timecode"
+        }
+        
+        return info
+    }
+    
+    private func extractColorSpaceInfo(_ lines: [String]) -> ColorSpaceInfo? {
+        for line in lines {
+            if line.contains("tv,") || line.contains("pc,") {
+                var colorInfo = ColorSpaceInfo(range: "", space: "", primaries: "", transfer: "", isHDR: false, hdrFormat: nil)
+                
+                let rangeMatch = "(tv|pc),"
+                if let range = line.range(of: rangeMatch, options: .regularExpression) {
+                    colorInfo.range = String(line[range]).trimmingCharacters(in: CharacterSet(charactersIn: ","))
+                }
+                
+                let spaceMatch = ", ([a-z]{2,6})/"
+                if let range = line.range(of: spaceMatch, options: .regularExpression) {
+                    let extracted = String(line[range]).trimmingCharacters(in: CharacterSet(charactersIn: ",/"))
+                    if !extracted.isEmpty {
+                        colorInfo.space = extracted
+                    }
+                }
+                
+                let primariesMatch = "(bt709|bt2020|smpte431|smpte432|bt601)"
+                if let range = line.range(of: primariesMatch, options: .regularExpression) {
+                    colorInfo.primaries = String(line[range])
+                }
+                
+                let transferMatch = "(bt709|smpte2084|hlg)"
+                if let range = line.range(of: transferMatch, options: .regularExpression) {
+                    colorInfo.transfer = String(line[range])
+                }
+                
+                if colorInfo.transfer == "smpte2084" || colorInfo.transfer == "hlg" || colorInfo.primaries == "smpte431" || colorInfo.primaries == "smpte432" {
+                    colorInfo.isHDR = true
+                    if colorInfo.transfer == "smpte2084" {
+                        colorInfo.hdrFormat = "HDR10"
+                    } else if colorInfo.transfer == "hlg" {
+                        colorInfo.hdrFormat = "Hybrid Log-Gamma"
+                    }
+                }
+                
+                if !colorInfo.range.isEmpty {
+                    return colorInfo
+                }
+            }
+        }
+        return nil
     }
     
     private func getTimecodeFilter(position: String) -> String {

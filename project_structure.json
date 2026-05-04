@@ -358,7 +358,9 @@
         ],
         "cancel_conversion": true,
         "auto_ffmpeg_download": true,
-        "dynamic_progress": true
+        "dynamic_progress": true,
+        "file_metadata_extraction": true,
+        "metadata_info_tab": true
     },
     "troubleshooting": [
         {
@@ -454,6 +456,18 @@
                 "where": "ContentView.swift cancelConversion()",
                 "how": "Add Cancel button to UI, currentConverter property, and terminate() on VideoConverter",
                 "status": "FIXED"
+            },
+            "view_file_metadata": {
+                "where": "New Info tab in ContentView.swift, extractMetadata() in VideoConverter.swift",
+                "how": "Call ffmpeg -i <file> 2>&1, parse stderr output with regex for streams and metadata, display in Info tab using GroupBox layout",
+                "metadata_includes": [
+                    "duration, bitrate, container format",
+                    "video streams (codec, profile, resolution, fps, pixel format, colorspace)",
+                    "audio streams (codec, sample rate, channels, bitrate, language)",
+                    "subtitle streams (codec, language)",
+                    "data streams (timecode, metadata)",
+                    "HDR/SDR detection based on transfer characteristics"
+                ]
             }
         },
         "update_script": "update_project_json.sh",
@@ -461,7 +475,8 @@
         "next_actions": [
             "Phase-2: Font fallback for timecode (check font exists, use fallback)",
             "Phase-2: Input validation (file size limit, valid codec check)",
-            "Phase-2: Error handling improvements (better FFmpeg error parsing)"
+            "Phase-2: Error handling improvements (better FFmpeg error parsing)",
+            "Phase-2 COMPLETE: File metadata extraction with Info tab"
         ]
     }
 }

@@ -12,6 +12,9 @@ struct ContentView: View {
     @State private var outputURL: URL?
     @State private var currentConverter: VideoConverter?
     
+    @State private var fileMetadata: VideoMetadata? = nil
+    @State private var isFetchingMetadata = false
+    
     // Video settings
     @State private var selectedVideoCodec = "H.264"
     @State private var selectedQuality = "23"
@@ -321,8 +324,213 @@ struct ContentView: View {
             .tabItem {
                 Label("Log", systemImage: "list.bullet")
             }
-        }
-        .frame(minWidth: 700, minHeight: 650)
+            
+            // ====== TAB 4: Info ======
+                Group {
+                    if let metadata = fileMetadata {
+                        if let error = metadata.error {
+                            VStack(spacing: 20) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .font(.system(size: 48))
+                                    .foregroundColor(.orange)
+                                
+                                Text("Erro ao carregar metadados")
+                                    .font(.headline)
+                                
+                                Text(error)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .padding()
+                                
+                                Button("Tentar Novamente") {
+                                    if let url = droppedFileURL {
+                                        Task {
+                                            await fetchMetadata(url)
+                                        }
+                                    }
+                                }
+                                .padding()
+                            }
+                        } else {
+                            ScrollView {
+                                VStack(alignment: .leading, spacing: 15) {
+                                    GroupBox("FILE") {
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            Text("Nome: \(metadata.filename)")
+                                            Text("Container: \(metadata.container ?? "unknown")")
+                                            Text("Duração: \(formatDuration(metadata.duration))")
+                                            if let bitrate = metadata.bitrate {
+                                                Text("Bitrate total: \(bitrate) kb/s")
+                                            }
+                                            Divider()
+                                            Text("\(metadata.videoStreams.count) vídeo(s) | \(metadata.audioStreams.count) áudio(s) | \(metadata.subtitleStreams.count) legenda(s) | \(metadata.dataStreams.count) dados")
+                                        }
+                                        .font(.system(size: 13, design: .monospaced))
+                                        .padding()
+                                    }
+                                    
+                                    if let colorInfo = metadata.colorSpaceInfo {
+                                        GroupBox("COLOR SPACE") {
+                                            VStack(alignment: .leading, spacing: 5) {
+                                                Text("Range: \(colorInfo.range)")
+                                                Text("Espaço: \(colorInfo.space)")
+                                                Text("Primárias: \(colorInfo.primaries)")
+                                                Text("Transferência: \(colorInfo.transfer)")
+                                                if colorInfo.isHDR {
+                                                    Text("HDR: \(colorInfo.hdrFormat ?? "Unknown")")
+                                                        .foregroundColor(.red)
+                                                } else {
+                                                    Text("SDR")
+                                                        .foregroundColor(.green)
+                                                }
+                                            }
+                                            .font(.system(size: 13, design: .monospaced))
+                                            .padding()
+                                        }
+                                    }
+                                    
+                                    if let timecode = metadata.timecode {
+                                        GroupBox("TIMECODE") {
+                                            Text(timecode)
+                                                .font(.system(size: 13, design: .monospaced))
+                                                .padding()
+                                        }
+                                    }
+                                    
+                                    if !metadata.videoStreams.isEmpty {
+                                        GroupBox("VIDEO STREAMS") {
+                                            ForEach(Array(metadata.videoStreams.enumerated()), id: \.offset) { idx, stream in
+                                                VStack(alignment: .leading, spacing: 6) {
+                                                    Text("Stream #\(idx): \(stream.codec) (\(stream.profile))")
+                                                        .font(.system(size: 13, design: .monospaced))
+                                                        .fontWeight(.bold)
+                                                    
+                                                    Text("\(stream.resolution) @ \(stream.frameRate)")
+                                                        .font(.system(size: 12, design: .monospaced))
+                                                    
+                                                    Text("Pix: \(stream.pixelFormat)")
+                                                        .font(.system(size: 12, design: .monospaced))
+                                                    
+                                                    Text("SAR: \(stream.sar)  DAR: \(stream.dar)")
+                                                        .font(.system(size: 12, design: .monospaced))
+                                                    
+                                                    if let bitrate = stream.bitrate {
+                                                        Text("Bitrate: \(bitrate) kb/s")
+                                                            .font(.system(size: 12, design: .monospaced))
+                                                    }
+                                                    
+                                                    if let colorRange = stream.colorRange {
+                                                        Text("Range: \(colorRange)")
+                                                            .font(.system(size: 12, design: .monospaced))
+                                                    }
+                                                    
+                                                    if stream.isHDR {
+                                                        Text("HDR (\(stream.colorPrimaries ?? "") / \(stream.colorSpace ?? ""))")
+                                                            .font(.system(size: 12, design: .monospaced))
+                                                            .foregroundColor(.red)
+                                                    }
+                                                    
+                                                    Divider()
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    if !metadata.audioStreams.isEmpty {
+                                        GroupBox("AUDIO STREAMS") {
+                                            ForEach(Array(metadata.audioStreams.enumerated()), id: \.offset) { idx, stream in
+                                                VStack(alignment: .leading, spacing: 5) {
+                                                    Text("Stream #\(idx): \(stream.codec)")
+                                                        .font(.system(size: 13, design: .monospaced))
+                                                        .fontWeight(.bold)
+                                                    
+                                                    Text("\(stream.sampleRate) Hz - \(stream.channels)")
+                                                        .font(.system(size: 12, design: .monospaced))
+                                                    
+                                                    if let bitrate = stream.bitrate {
+                                                        Text("Bitrate: \(bitrate) kb/s")
+                                                            .font(.system(size: 12, design: .monospaced))
+                                                    }
+                                                    
+                                                    if let lang = stream.language {
+                                                        Text("Idioma: \(lang)")
+                                                            .font(.system(size: 12, design: .monospaced))
+                                                    }
+                                            
+                                                    Divider()
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    if !metadata.subtitleStreams.isEmpty {
+                                        GroupBox("SUBTITLE STREAMS") {
+                                            ForEach(Array(metadata.subtitleStreams.enumerated()), id: \.offset) { idx, stream in
+                                                HStack {
+                                                    Text("Stream #\(idx): \(stream.codec)")
+                                                        .font(.system(size: 13, design: .monospaced))
+                                                    if let lang = stream.language {
+                                                        Text("(\(lang))")
+                                                            .font(.system(size: 12, design: .monospaced))
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    if !metadata.dataStreams.isEmpty {
+                                        GroupBox("DATA STREAMS") {
+                                            ForEach(Array(metadata.dataStreams.enumerated()), id: \.offset) { idx, stream in
+                                                HStack {
+                                                    Text("Stream #\(idx): \(stream.type)")
+                                                        .font(.system(size: 13, design: .monospaced))
+                                                    if let codec = stream.codec, codec != "none" {
+                                                        Text("(\(codec))")
+                                                            .font(.system(size: 12, design: .monospaced))
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                .padding()
+                            }
+                        }
+                    } else if isFetchingMetadata {
+                        VStack(spacing: 20) {
+                            ProgressView("Extraindo metadados...")
+                                .scaleEffect(1.2)
+                            
+                            Text("Aguarde enquanto analisamos o arquivo")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                            
+                            Text("Isso pode levar alguns segundos para arquivos grandes")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    } else {
+                        VStack(spacing: 20) {
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 64))
+                                .foregroundColor(.secondary)
+                            
+                            Text("Nenhum arquivo selecionado")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                            
+                            Text("Arraste ou selecione um arquivo para ver os detalhes técnicos")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .padding(30)
+                .tabItem {
+                    Label("Info", systemImage: "info.circle")
+                }
+            }
+            .frame(minWidth: 700, minHeight: 650)
     }
     
     private func handleDrop(providers: [NSItemProvider]) {
@@ -333,6 +541,9 @@ struct ContentView: View {
                 DispatchQueue.main.async {
                     droppedFileURL = url
                     statusMessage = "Arquivo pronto para conversão"
+                    Task {
+                        await fetchMetadata(url)
+                    }
                 }
             }
         }
@@ -345,8 +556,13 @@ struct ContentView: View {
         
         if panel.runModal() == .OK {
             if let url = panel.url {
-                droppedFileURL = url
-                statusMessage = "Arquivo pronto para conversão"
+                DispatchQueue.main.async {
+                    droppedFileURL = url
+                    statusMessage = "Arquivo pronto para conversão"
+                    Task {
+                        await fetchMetadata(url)
+                    }
+                }
             }
         }
     }
@@ -437,45 +653,38 @@ struct ContentView: View {
                 }
             }
         }
-                
-                let settings = ConversionSettings(
-                    videoCodec: mapVideoCodec(selectedVideoCodec),
-                    quality: selectedQuality,
-                    resolution: selectedResolution,
-                    framerate: selectedFramerate,
-                    audioCodec: selectedAudioCodec,
-                    audioBitrate: selectedAudioBitrate,
-                    audioSampleRate: selectedAudioSampleRate,
-                    addTimecode: showTimecode,
-                    timecodePosition: timecodePosition,
-                    outputPath: finalOutputURL.path
-                )
-                
-                try await converter.convert(
-                    inputURL: inputURL,
-                    settings: settings,
-                    onProgress: { progress in
-                        DispatchQueue.main.async {
-                            conversionProgress = progress
-                        }
-                    },
-                    onOutput: { output in
-                        DispatchQueue.main.async {
-                            logOutput.append(output)
-                        }
-                    }
-                )
-                
-                DispatchQueue.main.async {
-                    statusMessage = "✅ Conversão concluída!"
-                    isConverting = false
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    statusMessage = "❌ Conversão cancelada!"
-                    isConverting = false
-                }
+    }
+    .frame(minWidth: 700, minHeight: 650)
+}
+        isFetchingMetadata = true
+        
+        do {
+            let converter = VideoConverter()
+            let metadata = try await converter.extractMetadata(from: url)
+            DispatchQueue.main.async {
+                fileMetadata = metadata
+                isFetchingMetadata = false
             }
+        } catch {
+            DispatchQueue.main.async {
+                var errorMetadata = VideoMetadata(filename: url.lastPathComponent)
+                errorMetadata.error = error.localizedDescription
+                fileMetadata = errorMetadata
+                isFetchingMetadata = false
+            }
+        }
+    }
+    
+    private func formatDuration(_ duration: TimeInterval) -> String {
+        let hours = Int(duration) / 3600
+        let minutes = (Int(duration) % 3600) / 60
+        let seconds = Int(duration) % 60
+        let milliseconds = Int((duration.truncatingRemainder(dividingBy: 1)) * 100)
+        
+        if hours > 0 {
+            return String(format: "%02d:%02d:%02d.%02d", hours, minutes, seconds, milliseconds)
+        } else {
+            return String(format: "%02d:%02d.%02d", minutes, seconds, milliseconds)
         }
     }
     
