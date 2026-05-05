@@ -360,6 +360,7 @@
         "auto_ffmpeg_download": true,
         "dynamic_progress": true,
         "file_metadata_extraction": true,
+        "font_fallback": true,
         "metadata_info_tab": true
     },
     "troubleshooting": [
@@ -415,8 +416,7 @@
         }
     ],
     "known_issues": [
-        "Font path /System/Library/Fonts/Helvetica.ttc may not exist on all macOS versions",
-        "Build target inconsistency: Project level 13.0 vs Native target 14.6"
+        "Build target inconsistency: Project level 13.0 vs Native target 14.6 (FIXED: Font fallback implemented)"
     ],
     "ai_context": {
         "quick_summary": "macOS video converter with FFmpeg bundled, SwiftUI frontend, supports multiple codecs and timecode overlay. Phase-1 COMPLETE. JSON includes AI instructions, conventions, sync rules, and workflow guidelines for future modifications.",
@@ -471,12 +471,13 @@
             }
         },
         "update_script": "update_project_json.sh",
-        "last_phase": "Phase-1",
+        "last_phase": "Phase-2",
         "next_actions": [
-            "Phase-2: Font fallback for timecode (check font exists, use fallback)",
-            "Phase-2: Input validation (file size limit, valid codec check)",
-            "Phase-2: Error handling improvements (better FFmpeg error parsing)",
-            "Phase-2 COMPLETE: File metadata extraction with Info tab"
+            "Phase-2 COMPLETE: Font fallback for timecode (FIXED in 880d22a)",
+            "Phase-3: Rebuild Info Tab (ContentView.swift needs rewrite with metadata feature)",
+            "Phase-3: Input validation (file size limit, valid codec check)",
+            "Phase-3: Error handling improvements (better FFmpeg error parsing)",
+            "Phase-3: Build target alignment (13.0 → 14.6)"
         ]
     }
 }
