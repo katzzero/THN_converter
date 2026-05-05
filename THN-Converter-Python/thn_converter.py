@@ -58,8 +58,30 @@ class VideoConverter:
         }
         
         coords = positions.get(position, positions["bottom-center"])
-        # Use gmtime format like Swift does
-        return f"drawtext=text='%{{gmtime\\:%H:%M:%S}}':fontfile=/System/Library/Fonts/Helvetica.ttc:fontsize={font_size}:fontcolor={font_color}:box=1:boxcolor={box_color}:{coords}"
+        font_path = self._find_available_font()
+        
+        if font_path:
+            fontfile = f"fontfile={font_path}:"
+        else:
+            fontfile = ""
+        
+        return f"drawtext=text='%{{gmtime\\:%H:%M:%S}}':{fontfile}fontsize={font_size}:fontcolor={font_color}:box=1:boxcolor={box_color}:{coords}"
+    
+    def _find_available_font(self):
+        import os
+        font_paths = [
+            "/System/Library/Fonts/Helvetica.ttc",
+            "/System/Library/Fonts/HelveticaNeue.ttc",
+            "/System/Library/Fonts/SFPro.ttc",
+            "/System/Library/Fonts/Arial.ttc",
+            "/Library/Fonts/Arial.ttf"
+        ]
+        
+        for path in font_paths:
+            if os.path.exists(path):
+                return path
+        
+        return None
     
     def convert(self, input_path, output_path, settings, on_progress=None, on_output=None):
         args = [

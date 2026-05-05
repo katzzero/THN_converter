@@ -615,7 +615,8 @@ class VideoConverter: ObservableObject {
         let fontColor = "white"
         let fontSize = "24"
         let boxColor = "black@0.7"
-        let fontPath = "/System/Library/Fonts/Helvetica.ttc"
+        
+        let fontPath = findAvailableFont()
         
         switch position {
         case "top-left":
@@ -633,6 +634,26 @@ class VideoConverter: ObservableObject {
         default:
             return "drawtext=text='\\%{gmtime\\:%H:%M:%S}':fontfile=\(fontPath):fontsize=\(fontSize):fontcolor=\(fontColor):box=1:boxcolor=\(boxColor):x=(w-tw)/2:y=h-th-10"
         }
+    }
+    
+    private func findAvailableFont() -> String {
+        let fontPaths = [
+            "/System/Library/Fonts/Helvetica.ttc",
+            "/System/Library/Fonts/HelveticaNeue.ttc",
+            "/System/Library/Fonts/SFPro.ttc",
+            "/System/Library/Fonts/Arial.ttc",
+            "/Library/Fonts/Arial.ttf"
+        ]
+        
+        let fileManager = FileManager.default
+        
+        for path in fontPaths {
+            if fileManager.fileExists(atPath: path) {
+                return path
+            }
+        }
+        
+        return ""
     }
     
     private func findFFmpeg() -> String {
