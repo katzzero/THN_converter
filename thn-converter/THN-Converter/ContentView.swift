@@ -345,7 +345,7 @@ struct ContentView: View {
                                 Button("Tentar Novamente") {
                                     if let url = droppedFileURL {
                                         Task {
-                                            await fetchMetadata(url)
+                                            await fetchMetadata(url: url)
                                         }
                                     }
                                 }
@@ -542,7 +542,7 @@ struct ContentView: View {
                     droppedFileURL = url
                     statusMessage = "Arquivo pronto para conversão"
                     Task {
-                        await fetchMetadata(url)
+                        await fetchMetadata(url: url)
                     }
                 }
             }
@@ -560,7 +560,7 @@ struct ContentView: View {
                     droppedFileURL = url
                     statusMessage = "Arquivo pronto para conversão"
                     Task {
-                        await fetchMetadata(url)
+                        await fetchMetadata(url: url)
                     }
                 }
             }
@@ -654,55 +654,53 @@ struct ContentView: View {
             }
         }
     }
-    .frame(minWidth: 700, minHeight: 650)
-}
+
+    func cancelConversion() {
+        currentConverter?.cancel()
+        currentConverter = nil
+        isConverting = false
+        conversionProgress = 0
+        statusMessage = "Conversão cancelada"
+    }
+
+    func fetchMetadata(url: URL) async {
         isFetchingMetadata = true
-        
+        fileMetadata = nil
+
+        let converter = VideoConverter()
         do {
-            let converter = VideoConverter()
             let metadata = try await converter.extractMetadata(from: url)
-            DispatchQueue.main.async {
-                fileMetadata = metadata
-                isFetchingMetadata = false
+            await MainActor.run {
+                self.fileMetadata = metadata
+                self.isFetchingMetadata = false
             }
         } catch {
-            DispatchQueue.main.async {
-                var errorMetadata = VideoMetadata(filename: url.lastPathComponent)
-                errorMetadata.error = error.localizedDescription
-                fileMetadata = errorMetadata
-                isFetchingMetadata = false
+            await MainActor.run {
+                self.isFetchingMetadata = false
+                self.statusMessage = "Erro ao obter metadados: \(error.localizedDescription)"
             }
         }
     }
-    
-    private func formatDuration(_ duration: TimeInterval) -> String {
+
+    func formatDuration(_ duration: TimeInterval) -> String {
         let hours = Int(duration) / 3600
         let minutes = (Int(duration) % 3600) / 60
         let seconds = Int(duration) % 60
-        let milliseconds = Int((duration.truncatingRemainder(dividingBy: 1)) * 100)
-        
+
         if hours > 0 {
-            return String(format: "%02d:%02d:%02d.%02d", hours, minutes, seconds, milliseconds)
+            return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
         } else {
-            return String(format: "%02d:%02d.%02d", minutes, seconds, milliseconds)
+            return String(format: "%02d:%02d", minutes, seconds)
         }
     }
-    
-    private func cancelConversion() {
-        let converter = VideoConverter()
-        converter.cancel()
-        isConverting = false
-        statusMessage = "❌ Conversão cancelada"
-    }
-    
-    private func mapVideoCodec(_ codec: String) -> String {
+
+    func mapVideoCodec(_ codec: String) -> String {
         switch codec {
         case "H.264": return "libx264"
         case "H.265/HEVC": return "libx265"
-        case "ProRes": return "prores_ks"
-        case "DNxHD": return "dnxhd"
         case "VP9": return "libvpx-vp9"
-        case "MPEG-4": return "mpeg4"
+        case "AV1": return "libaom-av1"
+        case "ProRes": return "prores_ks"
         default: return "libx264"
         }
     }
