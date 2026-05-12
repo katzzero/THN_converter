@@ -268,44 +268,44 @@ class VideoConverter: ObservableObject {
                         if duration > 0 {
                             onProgress(min(currentTime / duration, 1.0))
                         }
-                    }
-                }
-            }
-        }
-    }
-    
-    func extractMetadata(from inputURL: URL) async throws -> VideoMetadata {
-        return try await withCheckedThrowingContinuation { continuation in
-            let process = Process()
-            let pipe = Pipe()
-            
-            process.executableURL = URL(fileURLWithPath: findFFmpeg())
-            process.arguments = ["-i", inputURL.path]
-            process.standardOutput = pipe
-            process.standardError = pipe
-            
-            var output = ""
-            
-            let pipeData = pipe.fileHandleForReading
-            pipeData.readabilityHandler = { pipeData in
-                let data = pipeData.availableData
-                if let line = String(data: data, encoding: .utf8) {
-                    output += line
-                }
-            }
-            
-            process.terminationHandler = { process in
-                pipe.fileHandleForReading.readabilityHandler = nil
-                
-                let metadata = self.parseFFmpegMetadata(output, filename: inputURL.lastPathComponent)
-                continuation.resume(returning: metadata)
-            }
-            
-            try? process.run()
-        }
-    }
-    
-    private func parseFFmpegMetadata(_ output: String, filename: String) -> VideoMetadata {
+                     }
+                 }
+             }
+         }
+}
+      
+      func extractMetadata(from inputURL: URL) async throws -> VideoMetadata {
+          return try await withCheckedThrowingContinuation { continuation in
+              let process = Process()
+              let pipe = Pipe()
+              
+              process.executableURL = URL(fileURLWithPath: findFFmpeg())
+              process.arguments = ["-i", inputURL.path]
+              process.standardOutput = pipe
+              process.standardError = pipe
+              
+              var output = ""
+              
+              let pipeData = pipe.fileHandleForReading
+              pipeData.readabilityHandler = { pipeData in
+                  let data = pipeData.availableData
+                  if let line = String(data: data, encoding: .utf8) {
+                      output += line
+                  }
+              }
+              
+              process.terminationHandler = { process in
+                  pipe.fileHandleForReading.readabilityHandler = nil
+                  
+                  let metadata = self.parseFFmpegMetadata(output, filename: inputURL.lastPathComponent)
+                  continuation.resume(returning: metadata)
+              }
+              
+              try? process.run()
+          }
+      }
+      
+      func parseFFmpegMetadata(_ output: String, filename: String) -> VideoMetadata {
         var metadata = VideoMetadata(filename: filename)
         let lines = output.components(separatedBy: .newlines)
         
@@ -364,7 +364,26 @@ class VideoConverter: ObservableObject {
         return metadata
     }
     
-    private func parseDuration(_ durationStr: String) -> TimeInterval {
+    // Helper function to determine HDR format
+    func hdrFormat(from transfer: String?, primaries: String?) -> String? {
+        guard let transfer = transfer, let primaries = primaries else { return nil }
+        
+        if transfer == "smpte2084" {
+            return "HDR10"
+        } else if transfer == "hlg" {
+            return "Hybrid Log-Gamma"
+        } else if primaries == "smpte431" || primaries == "smpte432" {
+            return "HDR (Unknown Format)"
+        }
+        
+        return nil
+     }
+     
+     func cancel() {
+         process?.terminate()
+     }
+ 
+     func parseDuration(_ durationStr: String) -> TimeInterval {
         let parts = durationStr.components(separatedBy: ":")
         guard parts.count >= 3 else { return 0 }
         
@@ -375,7 +394,7 @@ class VideoConverter: ObservableObject {
         return h * 3600 + m * 60 + s
     }
     
-    private func parseVideoStream(_ line: String) -> VideoStreamInfo? {
+    func parseVideoStream(_ line: String) -> VideoStreamInfo? {
         var info = VideoStreamInfo(index: 0, codec: "", profile: "", resolution: "", pixelFormat: "", frameRate: "", bitrate: nil, sar: "N/A", dar: "N/A")
         
         let indexPattern = "Stream #0:(\\d+)"
@@ -461,14 +480,15 @@ class VideoConverter: ObservableObject {
             info.colorTransfer = String(line[range])
         }
         
-        if info.colorTransfer == "smpte2084" || info.colorTransfer == "hlg" || info.colorPrimaries == "smpte431" || info.colorPrimaries == "smpte432" {
+        // Check for HDR using helper function
+        if let hdrFormat = hdrFormat(from: info.colorTransfer, primaries: info.colorPrimaries) {
             info.isHDR = true
         }
         
         return info
     }
     
-    private func parseAudioStream(_ line: String) -> AudioStreamInfo? {
+    func parseAudioStream(_ line: String) -> AudioStreamInfo? {
         var info = AudioStreamInfo(index: 0, codec: "", sampleRate: 0, channels: "", bitrate: nil)
         
         let indexPattern = "Stream #0:(\\d+)"
@@ -515,7 +535,7 @@ class VideoConverter: ObservableObject {
         return info
     }
     
-    private func parseSubtitleStream(_ line: String) -> SubtitleStreamInfo? {
+    func parseSubtitleStream(_ line: String) -> SubtitleStreamInfo? {
         var info = SubtitleStreamInfo(index: 0, codec: "", language: nil)
         
         let indexPattern = "Stream #0:(\\d+)"
@@ -539,7 +559,7 @@ class VideoConverter: ObservableObject {
         return info
     }
     
-    private func parseDataStream(_ line: String) -> DataStreamInfo? {
+    func parseDataStream(_ line: String) -> DataStreamInfo? {
         var info = DataStreamInfo(index: 0, type: "", codec: nil)
         
         let indexPattern = "Stream #0:(\\d+)"
@@ -566,7 +586,7 @@ class VideoConverter: ObservableObject {
         return info
     }
     
-    private func extractColorSpaceInfo(_ lines: [String]) -> ColorSpaceInfo? {
+    func extractColorSpaceInfo(_ lines: [String]) -> ColorSpaceInfo? {
         for line in lines {
             if line.contains("tv,") || line.contains("pc,") {
                 var colorInfo = ColorSpaceInfo(range: "", space: "", primaries: "", transfer: "", isHDR: false, hdrFormat: nil)
@@ -594,14 +614,11 @@ class VideoConverter: ObservableObject {
                     colorInfo.transfer = String(line[range])
                 }
                 
-                if colorInfo.transfer == "smpte2084" || colorInfo.transfer == "hlg" || colorInfo.primaries == "smpte431" || colorInfo.primaries == "smpte432" {
-                    colorInfo.isHDR = true
-                    if colorInfo.transfer == "smpte2084" {
-                        colorInfo.hdrFormat = "HDR10"
-                    } else if colorInfo.transfer == "hlg" {
-                        colorInfo.hdrFormat = "Hybrid Log-Gamma"
-                    }
-                }
+            // Check for HDR using helper function
+            if let hdrFormat = hdrFormat(from: colorInfo.transfer, primaries: colorInfo.primaries) {
+                colorInfo.isHDR = true
+                colorInfo.hdrFormat = hdrFormat
+            }
                 
                 if !colorInfo.range.isEmpty {
                     return colorInfo
@@ -611,7 +628,7 @@ class VideoConverter: ObservableObject {
         return nil
     }
     
-    private func getTimecodeFilter(position: String) -> String {
+    func getTimecodeFilter(position: String) -> String {
         let fontColor = "white"
         let fontSize = "24"
         let boxColor = "black@0.7"
@@ -636,7 +653,7 @@ class VideoConverter: ObservableObject {
         }
     }
     
-    private func findAvailableFont() -> String {
+    func findAvailableFont() -> String {
         let fontPaths = [
             "/System/Library/Fonts/Helvetica.ttc",
             "/System/Library/Fonts/HelveticaNeue.ttc",
@@ -656,7 +673,7 @@ class VideoConverter: ObservableObject {
         return ""
     }
     
-    private func findFFmpeg() -> String {
+    func findFFmpeg() -> String {
         // Try bundle path first (included in app)
         if let bundlePath = Bundle.main.path(forResource: "ffmpeg", ofType: nil) {
             return bundlePath
@@ -675,10 +692,6 @@ class VideoConverter: ObservableObject {
             }
         }
         
-        return "/usr/bin/ffmpeg"
-    }
-    
-    func cancel() {
-        process?.terminate()
-    }
-}
+         return "/usr/bin/ffmpeg"
+     }
+ }

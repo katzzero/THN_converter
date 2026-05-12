@@ -228,6 +228,15 @@ class ConverterApp(ctk.CTk):
         )
         self.file_label.pack(pady=(0, 15))
         
+        self.drop_label = ctk.CTkLabel(
+            drop_frame,
+            text="",
+            font=ctk.CTkFont(size=12),
+            text_color="gray",
+            justify="center"
+        )
+        self.drop_label.pack(pady=(0, 15))
+        
         self.drop_button = ctk.CTkButton(
             drop_frame,
             text="📁 Selecionar Arquivo",

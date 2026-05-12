@@ -1,0 +1,137 @@
+{
+  "manifest_version": "1.0.0",
+  "project_name": "THN Converter",
+  "created": "2026-05-07",
+  "description": "macOS video converter with FFmpeg backend - dual implementation (Swift + Python)",
+
+  "source_structure": {
+    "swift_implementation": {
+      "root": "thn-converter/THN-Converter/",
+      "entry_point": "THN_ConverterApp.swift",
+      "main_files": [
+        {
+          "file": "THN_ConverterApp.swift",
+          "purpose": "App entry point"
+        },
+        {
+          "file": "ContentView.swift",
+          "purpose": "Main SwiftUI interface with tabs (Principal, Opções, Log, Info)"
+        },
+        {
+          "file": "VideoConverter.swift",
+          "purpose": "FFmpeg wrapper, conversion and metadata extraction logic"
+        }
+      ]
+    },
+    "python_implementation": {
+      "root": "THN-Converter-Python/",
+      "entry_point": "thn_converter.py",
+      "purpose": "Alternative Python GUI implementation using CustomTkinter"
+    }
+  },
+
+  "pipelines": {
+    "conversion_pipeline": {
+      "swift": {
+        "flow": "ContentView.handleDrop() → validateFile() → convert() async → parseProgress() → onProgress callback",
+        "ffmpeg_path_resolution": "findFFmpeg() searches bundle, then system paths",
+        "progress_calculation": "parse Duration from FFmpeg output, then currentTime/duration"
+      },
+      "python": {
+        "flow": "convert() → subprocess.Popen → parse stdout line-by-line",
+        "ffmpeg_path_resolution": "find_ffmpeg() searches local, /usr/local/bin, /opt/homebrew/bin, /usr/bin",
+        "progress_calculation": "Parse Duration from 'Duration:' line, calculate from current_time/duration"
+      },
+      "shared": {
+        "codec_mapping": "libx264 → libx265 → prores_ks → dnxhd → vp9 → mpeg4",
+        "audio_codecs": "copy → aac → mp3 → opus → vorbis → flac → pcm",
+        "timecode_format": "%{gmtime:%H:%M:%S}",
+        "timecode_positions": ["top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right"]
+      }
+    },
+    "metadata_extraction_pipeline": {
+      "swift": {
+        "flow": "ContentView.fetchMetadata() → VideoConverter.extractMetadata() → parse FFmpeg stderr output",
+        "ffmpeg_command": "ffmpeg -i  2>&1",
+        "parsing_method": "Regex-based from stderr"
+      },
+      "python": {
+        "status": "NOT_IMPLEMENTED",
+        "note": "Metadata extraction only exists in Swift implementation"
+      }
+    }
+  },
+
+  "data_flow": {
+    "file_input": {
+      "method": "Drag-and-drop via SwiftUI .onDrop() or file picker button",
+      "validation": "UTType check for video files"
+    },
+    "settings_flow": {
+      "video_codec": "ContentView.picker → ConversionSettings.videoCodec → VideoConverter args",
+      "quality": "CRF value (0-51 for libx264/libx265)",
+      "resolution": "Scale filter or 'Original'",
+      "framerate": "Frame rate or 'Original'",
+      "audio_codec": "Copy or encode",
+      "add_timecode": "Boolean, position from picker"
+    },
+    "output_flow": {
+      "method": "User selects output path via NSSavePanel / tkFileDialog",
+      "default_behavior": "If not selected, append '_converted' to input filename"
+    }
+  },
+
+  "external_dependencies": {
+    "ffmpeg": {
+      "version": "N-124032-gfcffc0e1c5",
+      "size": "63624688 bytes (~60.7 MB)",
+      "included_in_bundle": true,
+      "download_script": "download-ffmpeg.sh",
+      "search_paths": [
+        "project_root/ffmpeg (bundled)",
+        "/usr/local/bin/ffmpeg",
+        "/opt/homebrew/bin/ffmpeg",
+        "/usr/bin/ffmpeg"
+      ]
+    },
+    "swift_frameworks": ["SwiftUI", "UniformTypeIdentifiers", "AppKit", "Foundation"],
+    "python_packages": ["customtkinter"]
+  },
+
+  "known_issues": [
+    {
+      "issue": "Font file not found on some macOS versions",
+      "status": "KNOWN_ISSUE",
+      "affected": "Swift + Python timecode overlay"
+    }
+  ],
+
+  "ai_reference_docs": {
+    "location": "AI/",
+    "files": [
+      {
+        "file": "project_structure.json",
+        "purpose": "Full project structure, conventions, workflow, troubleshooting"
+      },
+      {
+        "file": "METADATA_EXTRACTION.json",
+        "purpose": "Metadata extraction feature implementation details"
+      }
+    ]
+  },
+
+  "build_commands": {
+    "swift": "xcodebuild -project thn-converter/THN-Converter.xcodeproj -scheme THN-Converter -configuration Debug build",
+    "python": "cd THN-Converter-Python && python3 thn_converter.py",
+    "download_ffmpeg": "./download-ffmpeg.sh"
+  },
+
+  "sync_requirement": "When modifying conversion logic, both Swift and Python implementations must be updated to maintain feature parity",
+
+  "unknown_or_null": [
+    "exact git commit history beyond last recorded commit",
+    "automated test suite presence",
+    "future feature plans beyond Phase-2",
+    "exact macOS version compatibility details beyond deployment target"
+  ]
+}
