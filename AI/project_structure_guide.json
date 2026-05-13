@@ -1,28 +1,31 @@
 {
     "project": "THN Converter",
     "version": "1.0.0",
-    "description": "Video converter macOS app with FFmpeg backend, supporting multiple codecs, frame rates, audio options, and timecode overlay.",
+    "description": "Cross-platform video converter with FFmpeg backend, supporting multiple codecs, frame rates, audio options, and timecode overlay. Available on macOS (Swift) and Windows (C# WPF).",
     "created": "2026-04-22",
-    "last_modified": "2026-04-28",
+    "last_modified": "2026-05-13",
     "platform": [
-        "macOS"
+        "macOS",
+        "Windows"
     ],
     "languages": [
         "Swift",
-        "Python"
+        "Python",
+        "C#"
     ],
     "frameworks": [
         "SwiftUI",
         "UniformTypeIdentifiers",
         "AppKit",
-        "CustomTkinter"
+        "CustomTkinter",
+        "WPF",
+        ".NET 8"
     ],
     "git_state": {
-        "branch": "main",
-        "last_commit": "beb077b",
-        "last_commit_date": "2026-04-28",
-        "last_commit_msg": "Compare Python vs Swift and update JSON with all fixes",
-        "dirty": false
+        "branch": "win",
+        "last_commit": "HEAD",
+        "last_commit_date": "2026-05-13",
+        "last_commit_msg": "Port C# WPF Windows app + update AI guides"
     },
     "dependencies": {
         "Swift": [
@@ -38,6 +41,13 @@
             "re",
             "pathlib",
             "datetime"
+        ],
+        "C#": [
+            "WPF",
+            ".NET 8",
+            "System.Diagnostics",
+            "System.Text.RegularExpressions",
+            "Microsoft.Win32 (file dialogs)"
         ]
     },
     "external_tools": {
@@ -47,17 +57,24 @@
             "checksum_md5": "unknown",
             "source": "https://github.com/BtbN/FFmpeg-Builds/releases/latest",
             "included_in_bundle": true,
-            "search_paths": [
+            "search_paths_macos": [
                 "project_root/ffmpeg",
                 "/usr/local/bin/ffmpeg",
                 "/opt/homebrew/bin/ffmpeg",
                 "/usr/bin/ffmpeg"
             ],
-            "build_phase": "CopyFiles to app bundle",
-            "min_version_note": "Build includes FFmpeg for Apple Silicon (arm64)",
-            "integration": "Auto-download via download-ffmpeg.sh (not stored in git)",
+            "search_paths_windows": [
+                "./ffmpeg/ffmpeg.exe (bundled in project)",
+                "%LOCALAPPDATA%/ffmpeg/ffmpeg.exe",
+                "C:/Program Files/ffmpeg/bin/ffmpeg.exe",
+                "System PATH"
+            ],
+            "build_phase": "CopyFiles to app bundle (macOS) / Copy to Output Directory (Windows)",
+            "min_version_note": "Build includes FFmpeg for Apple Silicon (arm64) and Windows x64",
+            "integration": "Auto-download via download-ffmpeg.sh (macOS) / manual download (Windows)",
             "python_uses": "THN-Converter-Python/ffmpeg",
-            "swift_uses": "thn-converter/ffmpeg (copied to bundle)"
+            "swift_uses": "thn-converter/ffmpeg (copied to bundle)",
+            "csharp_uses": "win/THN-Converter-Win/ffmpeg/ffmpeg.exe (copied to output)"
         }
     },
     "file_metadata": {
@@ -81,6 +98,66 @@
                 "path": "THN-Converter-Python/thn_converter.py",
                 "size_bytes": "unknown",
                 "purpose": "Python alternative implementation"
+            },
+            {
+                "path": "win/THN-Converter-Win/MainWindow.xaml",
+                "size_bytes": "new",
+                "purpose": "WPF main window UI with 4 tabs"
+            },
+            {
+                "path": "win/THN-Converter-Win/MainWindow.xaml.cs",
+                "size_bytes": "new",
+                "purpose": "Code-behind with drag-drop and dialog handlers"
+            },
+            {
+                "path": "win/THN-Converter-Win/ViewModels/MainViewModel.cs",
+                "size_bytes": "new",
+                "purpose": "MVVM ViewModel with all commands and async logic"
+            },
+            {
+                "path": "win/THN-Converter-Win/Services/FfmpegService.cs",
+                "size_bytes": "new",
+                "purpose": "FFmpeg process management, progress, Windows font resolution"
+            },
+            {
+                "path": "win/THN-Converter-Win/Services/MetadataService.cs",
+                "size_bytes": "new",
+                "purpose": "Regex-based FFmpeg metadata extraction (mirrors Swift logic)"
+            },
+            {
+                "path": "win/THN-Converter-Win/Models/ConversionSettings.cs",
+                "size_bytes": "new",
+                "purpose": "Conversion settings data model"
+            },
+            {
+                "path": "win/THN-Converter-Win/Models/VideoMetadata.cs",
+                "size_bytes": "new",
+                "purpose": "Video metadata data model"
+            },
+            {
+                "path": "win/THN-Converter-Win/Models/StreamInfo.cs",
+                "size_bytes": "new",
+                "purpose": "Stream information models (Video, Audio, Subtitle, Data)"
+            },
+            {
+                "path": "win/THN-Converter-Win/Models/ColorSpaceInfo.cs",
+                "size_bytes": "new",
+                "purpose": "Color space information model"
+            },
+            {
+                "path": "win/THN-Converter-Win/Converters/Converters.cs",
+                "size_bytes": "new",
+                "purpose": "XAML value converters (BoolToVis, InverseBoolToVis, NullToVis)"
+            },
+            {
+                "path": "win/THN-Converter-Win/Commands/RelayCommand.cs",
+                "size_bytes": "new",
+                "purpose": "ICommand implementation for MVVM"
+            },
+            {
+                "path": "win/THN-Converter-Win/Styles/DarkTheme.xaml",
+                "size_bytes": "new",
+                "purpose": "Dark theme resource dictionary for WPF"
             }
         ],
         "config_files": [
@@ -477,7 +554,42 @@
             "Phase-3: Rebuild Info Tab (ContentView.swift needs rewrite with metadata feature)",
             "Phase-3: Input validation (file size limit, valid codec check)",
             "Phase-3: Error handling improvements (better FFmpeg error parsing)",
-            "Phase-3: Build target alignment (13.0 → 14.6)"
+            "Phase-3: Build target alignment (13.0 → 14.6)",
+            "Windows C# port: Download ffmpeg.exe and place in win/THN-Converter-Win/ffmpeg/",
+            "Windows C# port: Build and test on Windows with Visual Studio 2022 or 'dotnet build'",
+            "Windows C# port: Create installer or publish as single-file exe"
         ]
+    },
+    "csharp_implementation": {
+        "description": "Native Windows WPF application, .NET 8, MVVM architecture",
+        "root": "win/THN-Converter-Win/",
+        "entry_point": "MainWindow.xaml",
+        "architecture": {
+            "pattern": "MVVM (Model-View-ViewModel)",
+            "view": "MainWindow.xaml (4-tab TabControl interface)",
+            "viewmodel": "ViewModels/MainViewModel.cs (INotifyPropertyChanged, ICommand)",
+            "model": "Models/ConversionSettings.cs, VideoMetadata.cs, StreamInfo.cs, ColorSpaceInfo.cs",
+            "service": "Services/FfmpegService.cs, Services/MetadataService.cs"
+        },
+        "tab_structure": {
+            "tab_1_principal": "File drop zone, output selection, progress bar, convert/cancel buttons",
+            "tab_2_opcoes": "Video/audio codec settings, CRF quality, resolution, framerate, timecode overlay",
+            "tab_3_log": "Read-only console-style log output from FFmpeg",
+            "tab_4_info": "Metadata display with loading/empty/success/error states"
+        },
+        "ffmpeg_integration": {
+            "service": "Services/FfmpegService.cs",
+            "method": "System.Diagnostics.Process with event-based stdout/stderr reading",
+            "progress": "IProgress<double> callback + INotifyPropertyChanged update",
+            "font_resolution": "C:/Windows/Fonts/ with multiple fallback paths (arial → segoeui → tahoma → verdana → trebuc)",
+            "path_resolution": "Bundled ./ffmpeg/ffmpeg.exe → %LOCALAPPDATA% → Program Files → system PATH"
+        },
+        "metadata_extraction": {
+            "service": "Services/MetadataService.cs",
+            "method": "async Task with Process + ErrorDataReceived event",
+            "regex": "C# 11 source-generated Regex (partial class with [GeneratedRegex])",
+            "parsed_fields": ["Duration", "Bitrate", "Container", "VideoStreams", "AudioStreams", "SubtitleStreams", "DataStreams", "ColorSpace", "Timecode"],
+            "hdr_detection": "Same cascade logic as Swift: smpte2084 → hlg → smpte431/432"
+        }
     }
 }

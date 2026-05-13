@@ -2,7 +2,7 @@
   "feature_name": "File Metadata Extraction",
   "status": "COMPLETE",
   "created": "2026-04-28",
-  "last_modified": "2026-05-05",
+  "last_modified": "2026-05-13",
   "priority": "Phase-2",
   "implementation_date": "2026-05-05",
   
@@ -45,6 +45,25 @@
       "status": "COMPLETE"
     }
   ],
+  
+  "csharp_port": {
+    "status": "IMPLEMENTED",
+    "implementation_date": "2026-05-13",
+    "files_created": [
+      "win/THN-Converter-Win/Services/MetadataService.cs",
+      "win/THN-Converter-Win/Models/VideoMetadata.cs",
+      "win/THN-Converter-Win/Models/StreamInfo.cs",
+      "win/THN-Converter-Win/Models/ColorSpaceInfo.cs"
+    ],
+    "key_differences_from_swift": {
+      "types": "TimeInterval → TimeSpan",
+      "regex": "Uses source-generated Regex (C# 11 [GeneratedRegex]) for better performance",
+      "async_pattern": "async Task + TaskCompletionSource instead of Swift continuations",
+      "output_capture": "RedirectStandardError + ErrorDataReceived event handler",
+      "color_space": "Combined extraction in ExtractColorSpace() method (same logic)"
+    },
+    "regex_patterns": "All regex patterns are direct mirrors of the Swift implementation, migrated to C# [GeneratedRegex] syntax"
+  },
   
   "data_structures": {
     "VideoMetadata": {
@@ -108,7 +127,8 @@
     "ffmpeg_command": "ffmpeg -i <filepath> 2>&1",
     "parsing_method": "Regex-based string parsing from stderr output",
     "metadata_location": "stderr, not stdout",
-    "execution_mode": "async/await with Process",
+    "execution_mode": "async/await with Process (Swift) / async Task (C#)",
+    "implemented_in": ["Swift (VideoConverter.swift)", "C# (Services/MetadataService.cs)"],
     "stream_types": {
       "video": "Contains 'Video:' in stream line",
       "audio": "Contains 'Audio:' in stream line",

@@ -2,7 +2,7 @@
   "manifest_version": "1.0.0",
   "project_name": "THN Converter",
   "created": "2026-05-07",
-  "description": "macOS video converter with FFmpeg backend - dual implementation (Swift + Python)",
+  "description": "Cross-platform video converter with FFmpeg backend - triple implementation (Swift/macOS + Python + C#/Windows)",
 
   "source_structure": {
     "swift_implementation": {
@@ -27,6 +27,37 @@
       "root": "THN-Converter-Python/",
       "entry_point": "thn_converter.py",
       "purpose": "Alternative Python GUI implementation using CustomTkinter"
+    },
+    "csharp_implementation": {
+      "root": "win/THN-Converter-Win/",
+      "entry_point": "MainWindow.xaml",
+      "framework": "WPF (.NET 8)",
+      "main_files": [
+        {
+          "file": "MainWindow.xaml",
+          "purpose": "Main WPF window with 4-tab interface (Principal, Opções, Log, Info)"
+        },
+        {
+          "file": "MainWindow.xaml.cs",
+          "purpose": "Code-behind with drag-drop and dialog event handlers"
+        },
+        {
+          "file": "ViewModels/MainViewModel.cs",
+          "purpose": "MVVM ViewModel with all properties, commands, and async conversion logic"
+        },
+        {
+          "file": "Services/FfmpegService.cs",
+          "purpose": "FFmpeg process management, progress parsing, Windows font resolution"
+        },
+        {
+          "file": "Services/MetadataService.cs",
+          "purpose": "Metadata extraction via regex-based FFmpeg output parsing"
+        },
+        {
+          "file": "Models/*.cs",
+          "purpose": "Data models: ConversionSettings, VideoMetadata, StreamInfo, ColorSpaceInfo"
+        }
+      ]
     }
   },
 
@@ -41,6 +72,11 @@
         "flow": "convert() → subprocess.Popen → parse stdout line-by-line",
         "ffmpeg_path_resolution": "find_ffmpeg() searches local, /usr/local/bin, /opt/homebrew/bin, /usr/bin",
         "progress_calculation": "Parse Duration from 'Duration:' line, calculate from current_time/duration"
+      },
+      "csharp": {
+        "flow": "MainViewModel.ConvertAsync() → FfmpegService.Convert() → Process with async events → IProgress<double> callback",
+        "ffmpeg_path_resolution": "FindFfmpeg() searches bundled ./ffmpeg/, %LOCALAPPDATA%, Program Files, system PATH",
+        "progress_calculation": "Regex-based from stdout/stderr output, same pattern as Swift/Python"
       },
       "shared": {
         "codec_mapping": "libx264 → libx265 → prores_ks → dnxhd → vp9 → mpeg4",
@@ -58,6 +94,12 @@
       "python": {
         "status": "NOT_IMPLEMENTED",
         "note": "Metadata extraction only exists in Swift implementation"
+      },
+      "csharp": {
+        "status": "IMPLEMENTED",
+        "flow": "MainViewModel.FetchMetadataAsync() → MetadataService.ExtractMetadataAsync() → ParseFfmpegOutput() with regex",
+        "ffmpeg_command": "ffmpeg -i <filepath> 2>&1",
+        "parsing_method": "Regex-based from stderr (same patterns as Swift)"
       }
     }
   },
@@ -76,8 +118,8 @@
       "add_timecode": "Boolean, position from picker"
     },
     "output_flow": {
-      "method": "User selects output path via NSSavePanel / tkFileDialog",
-      "default_behavior": "If not selected, append '_converted' to input filename"
+      "method": "User selects output path via NSSavePanel / SaveFileDialog / tkFileDialog",
+      "default_behavior": "If not selected, generate timestamped filename in Downloads folder"
     }
   },
 
@@ -87,15 +129,23 @@
       "size": "63624688 bytes (~60.7 MB)",
       "included_in_bundle": true,
       "download_script": "download-ffmpeg.sh",
-      "search_paths": [
+      "search_paths_macos": [
         "project_root/ffmpeg (bundled)",
         "/usr/local/bin/ffmpeg",
         "/opt/homebrew/bin/ffmpeg",
         "/usr/bin/ffmpeg"
+      ],
+      "search_paths_windows": [
+        "./ffmpeg/ffmpeg.exe (bundled)",
+        "%LOCALAPPDATA%/ffmpeg/ffmpeg.exe",
+        "C:/Program Files/ffmpeg/bin/ffmpeg.exe",
+        "System PATH"
       ]
     },
     "swift_frameworks": ["SwiftUI", "UniformTypeIdentifiers", "AppKit", "Foundation"],
-    "python_packages": ["customtkinter"]
+    "python_packages": ["customtkinter"],
+    "dotnet_frameworks": ["WPF", ".NET 8"],
+    "windows_fonts": ["C:/Windows/Fonts/arial.ttf", "C:/Windows/Fonts/segoeui.ttf", "C:/Windows/Fonts/tahoma.ttf"]
   },
 
   "known_issues": [
@@ -103,6 +153,12 @@
       "issue": "Font file not found on some macOS versions",
       "status": "KNOWN_ISSUE",
       "affected": "Swift + Python timecode overlay"
+    },
+    {
+      "issue": "Font file not found on some Windows versions",
+      "status": "MITIGATED",
+      "affected": "C# timecode overlay (multiple fallback paths configured)",
+      "note": "Falls back to empty fontfile parameter if no Windows font found"
     }
   ],
 
@@ -110,11 +166,11 @@
     "location": "AI/",
     "files": [
       {
-        "file": "project_structure.json",
+        "file": "project_structure_guide.json",
         "purpose": "Full project structure, conventions, workflow, troubleshooting"
       },
       {
-        "file": "METADATA_EXTRACTION.json",
+        "file": "metadata_extraction_guide.json",
         "purpose": "Metadata extraction feature implementation details"
       }
     ]
@@ -123,10 +179,14 @@
   "build_commands": {
     "swift": "xcodebuild -project thn-converter/THN-Converter.xcodeproj -scheme THN-Converter -configuration Debug build",
     "python": "cd THN-Converter-Python && python3 thn_converter.py",
+    "csharp": "dotnet build win/THN-Converter-Win/THN-Converter-Win.csproj -c Release",
+    "csharp_publish": "dotnet publish win/THN-Converter-Win/THN-Converter-Win.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true",
     "download_ffmpeg": "./download-ffmpeg.sh"
   },
 
-  "sync_requirement": "When modifying conversion logic, both Swift and Python implementations must be updated to maintain feature parity",
+  "sync_requirement": "When modifying conversion logic, all implementations (Swift, Python, C#) must be updated to maintain feature parity",
+
+  "platforms": ["macOS (Swift + Python)", "Windows (C# + Python)"],
 
   "unknown_or_null": [
     "exact git commit history beyond last recorded commit",
