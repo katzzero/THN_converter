@@ -166,6 +166,10 @@
     "location": "AI/",
     "files": [
       {
+        "file": "MAINTENANCE_GUIDE.md",
+        "purpose": "3-branch sync guide: file mapping, change procedures, platform parity rules"
+      },
+      {
         "file": "project_structure_guide.json",
         "purpose": "Full project structure, conventions, workflow, troubleshooting"
       },
