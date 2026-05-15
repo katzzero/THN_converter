@@ -1,35 +1,24 @@
 # THN Converter for macOS
 
-Native video converter for macOS Apple Silicon with SwiftUI interface.
+Native macOS application built with Swift and SwiftUI. FFmpeg backend for video conversion.
 
-## Features
-
-- Video conversion with multiple codecs (H.264, H.265, ProRes, DNxHD, VP9)
-- Resolution selection (4K, Full HD, HD, SD, Original)
-- Framerate control (60, 30, 24, etc)
-- Independent audio codecs (AAC, MP3, Opus, FLAC, etc)
-- Timecode overlay burned into video
-- Drag & drop interface
-- Real-time progress bar
-- Optimized for Apple Silicon (ARM64)
-
-## Requirements
+## Prerequisites
 
 - macOS 13.0+
 - Xcode Command Line Tools
 - FFmpeg (downloaded automatically on build)
 
-## How to Build
+## Build & Run
 
 ```bash
-# 1. Download FFmpeg and compile the app
+# Build
 ./build.sh
 
-# 2. Install the app
+# Install the app
 cp -r THN-Converter/build/Build/Products/Release/THN-Converter.app /Applications/
 ```
 
-## How to Use
+## Usage
 
 1. Drag a video file to the designated area
 2. Select desired settings:
@@ -42,7 +31,18 @@ cp -r THN-Converter/build/Build/Products/Release/THN-Converter.app /Applications
    - Sample rate
    - Timecode overlay (optional)
 3. Click "Convert"
-4. The converted file will be saved in **Downloads**
+4. The converted file will be saved in Downloads
+
+## Features
+
+- Video conversion with multiple codecs (H.264, H.265, ProRes, DNxHD, VP9)
+- Resolution selection (4K, Full HD, HD, SD, Original)
+- Framerate control (60, 30, 24, etc)
+- Independent audio codecs (AAC, MP3, Opus, FLAC, etc)
+- Timecode overlay burned into video
+- Drag & drop interface
+- Real-time progress bar
+- Optimized for Apple Silicon (ARM64)
 
 ## Project Structure
 
