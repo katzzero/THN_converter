@@ -33,6 +33,7 @@ jobs:
       - name: Package
         run: |
           cd build/Build/Products/Release
+          codesign --remove-signature THN-Converter.app
           xattr -cr THN-Converter.app
           zip -r THN-Converter-macOS.zip THN-Converter.app
 
