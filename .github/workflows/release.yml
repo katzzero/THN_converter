@@ -20,19 +20,19 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Restore
-        run: dotnet restore THN-Converter-Win.csproj -r win-x64
-
-      - name: Build
-        run: dotnet build THN-Converter-Win.csproj -c Release -r win-x64 --no-restore
-
-      - name: Publish
+      - name: Publish (single file)
         run: |
-          dotnet publish THN-Converter-Win.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
+          dotnet publish THN-Converter-Win.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true
 
       - name: Package
         run: |
-          Compress-Archive -Path bin/Release/net8.0-windows/win-x64/publish/THN-Converter-Win.exe -DestinationPath THN-Converter-Windows.zip
+          Compress-Archive `
+            -Path bin/Release/net8.0-windows/win-x64/publish/THN-Converter-Win.exe `
+            -DestinationPath THN-Converter-Windows.zip
 
       - name: Release
         uses: softprops/action-gh-release@v2
