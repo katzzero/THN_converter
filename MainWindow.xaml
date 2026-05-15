@@ -17,6 +17,8 @@
         <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis"/>
         <conv:NullToVisibilityConverter x:Key="NullToVis"/>
         <conv:NullToBoolConverter x:Key="NullToBool"/>
+        <conv:InverseBoolConverter x:Key="InverseBool"/>
+        <conv:InverseNullToVisibilityConverter x:Key="InverseNullToVis"/>
         <Style x:Key="SettingRow" TargetType="StackPanel">
             <Setter Property="Orientation" Value="Horizontal"/>
             <Setter Property="Margin" Value="0,3"/>
@@ -83,12 +85,12 @@
                                        Visibility="{Binding OutputFilePath, Converter={StaticResource NullToVis}}"/>
                             <TextBlock Text="Clique para escolher destino" FontSize="12"
                                        Foreground="{StaticResource TextSecondaryBrush}"
-                                       Visibility="{Binding OutputFilePath, Converter={StaticResource InverseBoolToVis}}"/>
+                                           Visibility="{Binding OutputFilePath, Converter={StaticResource InverseNullToVis}}"/>
                         </StackPanel>
                         <Button Grid.Column="1" Content="📁 Selecionar Destino"
                                 Command="{Binding SelectOutputCommand}"
                                 Height="40" Padding="15,0"
-                                IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBoolToVis}}"/>
+                                IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}"/>
                     </Grid>
                 </Border>
 
@@ -123,7 +125,7 @@
                         <StackPanel>
                             <StackPanel Style="{StaticResource SettingRow}">
                                 <Label Content="Codec:" Style="{StaticResource SettingLabel}"/>
-                                <ComboBox SelectedValue="{Binding SelectedVideoCodec}" Width="220">
+                                <ComboBox SelectedValue="{Binding SelectedVideoCodec}" SelectedValuePath="Content" Width="220">
                                     <ComboBoxItem Content="H.264"/>
                                     <ComboBoxItem Content="H.265/HEVC"/>
                                     <ComboBoxItem Content="ProRes"/>
@@ -134,7 +136,7 @@
                             </StackPanel>
                             <StackPanel Style="{StaticResource SettingRow}">
                                 <Label Content="Qualidade (CRF):" Style="{StaticResource SettingLabel}"/>
-                                <ComboBox SelectedValue="{Binding SelectedQuality}" Width="220">
+                                <ComboBox SelectedValue="{Binding SelectedQuality}" SelectedValuePath="Content" Width="220">
                                     <ComboBoxItem Content="0 (Máxima)"/>
                                     <ComboBoxItem Content="10"/>
                                     <ComboBoxItem Content="15"/>
@@ -147,7 +149,7 @@
                             </StackPanel>
                             <StackPanel Style="{StaticResource SettingRow}">
                                 <Label Content="Resolução:" Style="{StaticResource SettingLabel}"/>
-                                <ComboBox SelectedValue="{Binding SelectedResolution}" Width="220">
+                                <ComboBox SelectedValue="{Binding SelectedResolution}" SelectedValuePath="Content" Width="220">
                                     <ComboBoxItem Content="Original"/>
                                     <ComboBoxItem Content="3840x2160 (4K)"/>
                                     <ComboBoxItem Content="1920x1080 (Full HD)"/>
@@ -157,7 +159,7 @@
                             </StackPanel>
                             <StackPanel Style="{StaticResource SettingRow}">
                                 <Label Content="Framerate:" Style="{StaticResource SettingLabel}"/>
-                                <ComboBox SelectedValue="{Binding SelectedFramerate}" Width="220">
+                                <ComboBox SelectedValue="{Binding SelectedFramerate}" SelectedValuePath="Content" Width="220">
                                     <ComboBoxItem Content="Original"/>
                                     <ComboBoxItem Content="60"/>
                                     <ComboBoxItem Content="59.94"/>
@@ -175,7 +177,7 @@
                         <StackPanel>
                             <StackPanel Style="{StaticResource SettingRow}">
                                 <Label Content="Codec:" Style="{StaticResource SettingLabel}"/>
-                                <ComboBox SelectedValue="{Binding SelectedAudioCodec}" Width="250">
+                                <ComboBox SelectedValue="{Binding SelectedAudioCodec}" SelectedValuePath="Content" Width="250">
                                     <ComboBoxItem Content="copy (não converter)"/>
                                     <ComboBoxItem Content="AAC"/>
                                     <ComboBoxItem Content="MP3"/>
@@ -188,7 +190,7 @@
                             <StackPanel Style="{StaticResource SettingRow}"
                                         Visibility="{Binding ShowAudioSettings, Converter={StaticResource BoolToVis}}">
                                 <Label Content="Bitrate:" Style="{StaticResource SettingLabel}"/>
-                                <ComboBox SelectedValue="{Binding SelectedAudioBitrate}" Width="220">
+                                <ComboBox SelectedValue="{Binding SelectedAudioBitrate}" SelectedValuePath="Content" Width="220">
                                     <ComboBoxItem Content="320k"/>
                                     <ComboBoxItem Content="256k"/>
                                     <ComboBoxItem Content="192k"/>
@@ -199,7 +201,7 @@
                             <StackPanel Style="{StaticResource SettingRow}"
                                         Visibility="{Binding ShowAudioSettings, Converter={StaticResource BoolToVis}}">
                                 <Label Content="Sample Rate:" Style="{StaticResource SettingLabel}"/>
-                                <ComboBox SelectedValue="{Binding SelectedAudioSampleRate}" Width="220">
+                                <ComboBox SelectedValue="{Binding SelectedAudioSampleRate}" SelectedValuePath="Content" Width="220">
                                     <ComboBoxItem Content="48000"/>
                                     <ComboBoxItem Content="44100"/>
                                     <ComboBoxItem Content="96000"/>
@@ -215,7 +217,7 @@
                             <StackPanel Style="{StaticResource SettingRow}"
                                         Visibility="{Binding ShowTimecode, Converter={StaticResource BoolToVis}}">
                                 <Label Content="Posição:" Style="{StaticResource SettingLabel}"/>
-                                <ComboBox SelectedValue="{Binding TimecodePosition}" Width="220">
+                                <ComboBox SelectedValue="{Binding TimecodePosition}" SelectedValuePath="Content" Width="220">
                                     <ComboBoxItem Content="top-left"/>
                                     <ComboBoxItem Content="top-center"/>
                                     <ComboBoxItem Content="top-right"/>

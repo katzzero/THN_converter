@@ -8,6 +8,8 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        ShutdownMode = ShutdownMode.OnMainWindowClose;
+
         var resources = new ResourceDictionary
         {
             Source = new Uri("pack://application:,,,/Styles/DarkTheme.xaml")

@@ -261,9 +261,9 @@ public class MainViewModel : INotifyPropertyChanged
                 ConversionProgress = p;
             });
 
-            await _ffmpeg.Convert(DroppedFilePath, settings, progress, msg =>
+            await _ffmpeg.ConvertAsync(DroppedFilePath, settings, progress, msg =>
             {
-                LogOutput += msg;
+                Application.Current.Dispatcher.InvokeAsync(() => LogOutput += msg);
             });
 
             StatusMessage = "✅ Conversão concluída!";

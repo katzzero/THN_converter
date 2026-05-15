@@ -28,7 +28,7 @@ public class FfmpegService
         return "ffmpeg.exe";
     }
 
-    public async Task Convert(
+    public async Task ConvertAsync(
         string inputPath,
         ConversionSettings settings,
         IProgress<double>? onProgress,
@@ -76,7 +76,7 @@ public class FfmpegService
         _process.Start();
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
-        _process.WaitForExit();
+        await _process.WaitForExitAsync();
 
         if (_process.ExitCode == 0)
         {
