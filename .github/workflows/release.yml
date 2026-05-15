@@ -20,6 +20,17 @@ jobs:
         with:
           dotnet-version: '8.x'
 
+      - name: Diagnostic - SDK info
+        run: |
+          dotnet --list-sdks
+          dotnet --list-runtimes
+          dotnet workload list
+
+      - name: Install WPF targeting pack
+        run: |
+          dotnet restore THN-Converter-Win.csproj -p:RestoreUseStaticGraphEvaluation=true
+          dotnet build THN-Converter-Win.csproj -c Release -v detailed 2>&1 | Select-String -Pattern "error|WPF|WinFX|Presentation" | Select-Object -First 20
+
       - name: Build
         run: dotnet build THN-Converter-Win.csproj -c Release
 
