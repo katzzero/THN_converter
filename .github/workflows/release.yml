@@ -20,19 +20,14 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Diagnostic - SDK info
-        run: |
-          dotnet --list-sdks
-          dotnet --list-runtimes
-          dotnet workload list
+      - name: Install WPF SDK
+        run: dotnet workload install wpf 2>&1 || dotnet workload install Microsoft.WindowsDesktop.App.Ref 2>&1 || echo "⚠️ workload install not critical"
 
-      - name: Install WPF targeting pack
-        run: |
-          dotnet restore THN-Converter-Win.csproj -p:RestoreUseStaticGraphEvaluation=true
-          dotnet build THN-Converter-Win.csproj -c Release -v detailed 2>&1 | Select-String -Pattern "error|WPF|WinFX|Presentation" | Select-Object -First 20
+      - name: Restore
+        run: dotnet restore THN-Converter-Win.csproj
 
       - name: Build
-        run: dotnet build THN-Converter-Win.csproj -c Release
+        run: msbuild THN-Converter-Win.csproj /p:Configuration=Release /p:Platform=x64 /t:Build
 
       - name: Publish
         run: dotnet publish THN-Converter-Win.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true --no-build
