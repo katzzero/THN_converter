@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="ffmpeg\ffmpeg.exe" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="ffmpeg\ffmpeg.exe" CopyToOutputDirectory="PreserveNewest" Condition="Exists('ffmpeg\ffmpeg.exe')" />
   </ItemGroup>
 
 </Project>

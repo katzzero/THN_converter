@@ -1,3 +1,6 @@
+using System;
+using System.Windows;
+
 namespace THN_Converter_Win;
 
 public partial class App : Application
