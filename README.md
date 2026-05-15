@@ -1,71 +1,71 @@
-# THN Converter 🎬
+# THN Converter for macOS
 
-Conversor de vídeo nativo para macOS Apple Silicon com interface SwiftUI.
+Native video converter for macOS Apple Silicon with SwiftUI interface.
 
 ## Features
 
-- ✅ Conversão de vídeo com múltiplos codecs (H.264, H.265, ProRes, DNxHD, VP9)
-- ✅ Seleção de resolução (4K, Full HD, HD, SD, Original)
-- ✅ Controle de framerate (60, 30, 24, etc)
-- ✅ Codecs de áudio independentes (AAC, MP3, Opus, FLAC, etc)
-- ✅ Overlay de timecode queimado no vídeo
-- ✅ Interface drag & drop simples
-- ✅ Barra de progresso em tempo real
-- ✅ Otimizado para Apple Silicon (ARM64)
+- Video conversion with multiple codecs (H.264, H.265, ProRes, DNxHD, VP9)
+- Resolution selection (4K, Full HD, HD, SD, Original)
+- Framerate control (60, 30, 24, etc)
+- Independent audio codecs (AAC, MP3, Opus, FLAC, etc)
+- Timecode overlay burned into video
+- Drag & drop interface
+- Real-time progress bar
+- Optimized for Apple Silicon (ARM64)
 
-## Requisitos
+## Requirements
 
 - macOS 13.0+
 - Xcode Command Line Tools
-- FFmpeg (baixado automaticamente no build)
+- FFmpeg (downloaded automatically on build)
 
-## Como Buildar
+## How to Build
 
 ```bash
-# 1. Baixe o FFmpeg e compile o app
+# 1. Download FFmpeg and compile the app
 ./build.sh
 
-# 2. Instale o app
+# 2. Install the app
 cp -r THN-Converter/build/Build/Products/Release/THN-Converter.app /Applications/
 ```
 
-## Como Usar
+## How to Use
 
-1. Arraste um arquivo de vídeo para a área indicada
-2. Selecione as configurações desejadas:
-   - Codec de vídeo
-   - Resolução
+1. Drag a video file to the designated area
+2. Select desired settings:
+   - Video codec
+   - Resolution
    - Framerate
-   - Bitrate de vídeo
-   - Codec de áudio
-   - Bitrate de áudio
+   - Video bitrate
+   - Audio codec
+   - Audio bitrate
    - Sample rate
-   - Overlay de timecode (opcional)
-3. Clique em "Converter"
-4. O arquivo convertido será salvo na pasta **Downloads**
+   - Timecode overlay (optional)
+3. Click "Convert"
+4. The converted file will be saved in **Downloads**
 
-## Estrutura do Projeto
+## Project Structure
 
 ```
 THN-Converter/
-├── THN-Converter.xcodeproj/     # Projeto Xcode
+├── THN-Converter.xcodeproj/     # Xcode project
 ├── THN-Converter/
 │   ├── THN_ConverterApp.swift   # App entry point
-│   ├── ContentView.swift        # Interface principal
-│   ├── SettingsView.swift       # View de configurações
-│   ├── VideoConverter.swift     # Lógica de conversão FFmpeg
-│   └── Assets.xcassets/         # Assets do app
-├── build.sh                     # Script de build
-└── download-ffmpeg.sh          # Script para baixar FFmpeg
+│   ├── ContentView.swift        # Main interface
+│   ├── SettingsView.swift       # Settings view
+│   ├── VideoConverter.swift     # FFmpeg conversion logic
+│   └── Assets.xcassets/         # App assets
+├── build.sh                     # Build script
+└── download-ffmpeg.sh          # FFmpeg download script
 ```
 
-## Tecnologias
+## Technologies
 
-- **Swift 5** - Linguagem
+- **Swift 5** - Language
 - **SwiftUI** - Interface
-- **FFmpeg** - Engine de conversão
-- **Process** - Execução do FFmpeg
+- **FFmpeg** - Conversion engine
+- **Process** - FFmpeg execution
 
-## Licença
+## License
 
 MIT
