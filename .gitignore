@@ -29,6 +29,10 @@ obj/
 # Logs
 *.log
 
+# Git worktrees (local only)
+macos/
+python/
+
 # .NET / C# build artifacts
 bin/
 obj/
