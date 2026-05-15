@@ -1,40 +1,24 @@
 # THN Converter for Python
 
-Portable video converter in Python with modern graphical interface.
+Cross-platform Python application built with CustomTkinter. FFmpeg backend for video conversion.
 
-## Features
+## Prerequisites
 
-- Modern and responsive interface (dark/light mode)
-- Drag & drop file support
-- Multiple video codecs (H.264, H.265, ProRes, DNxHD, VP9)
-- Resolution, framerate, and quality (CRF) control
-- Independent audio codecs
-- Timecode overlay burned into video
-- Real-time progress bar
-- Detailed conversion log
-- Optimized for Apple Silicon
-- Custom save location selection
-- Audio settings only when needed
-- Optimized grid layout interface
+- Python 3.8+
+- pip3 (Python package manager)
+- FFmpeg (downloaded automatically on first run)
 
-## Quick Installation
+## Build & Run
 
 ```bash
-# 1. Install dependencies and download FFmpeg
+# Install dependencies and download FFmpeg
 ./install.sh
 
-# 2. Run the app
+# Run the app
 python3 thn_converter.py
-```
 
-## Create Installable App
-
-```bash
-# Create app bundle
+# Create app bundle (macOS)
 ./create-app.sh
-
-# Install in Applications
-cp -r THN-Converter.app /Applications/
 ```
 
 ## Usage
@@ -48,13 +32,26 @@ cp -r THN-Converter.app /Applications/
    - Resolution (4K, Full HD, HD, SD, Original)
    - Framerate (60, 30, 24, etc)
    - Audio codec
-   - Audio bitrate (appears only if not "copy")
+   - Audio bitrate
    - Sample rate
    - Timecode overlay (optional)
 5. Click "Convert"
 6. Wait - file saved to chosen location
 
-## Structure
+## Features
+
+- Modern and responsive interface (dark/light mode)
+- Drag & drop file support
+- Multiple video codecs (H.264, H.265, ProRes, DNxHD, VP9)
+- Resolution, framerate, and quality (CRF) control
+- Independent audio codecs
+- Timecode overlay burned into video
+- Real-time progress bar
+- Detailed conversion log
+- Custom save location selection
+- Audio settings only when needed
+
+## Project Structure
 
 ```
 THN-Converter-Python/
@@ -65,38 +62,12 @@ THN-Converter-Python/
 └── ffmpeg              # FFmpeg binary (downloaded automatically)
 ```
 
-## Requirements
-
-- macOS 13.0+
-- Python 3.8+
-- pip3 (Python package manager)
-
 ## Technologies
 
 - **CustomTkinter** - Modern interface
 - **FFmpeg** - Conversion engine
 - **Python 3** - Language
 
-## Tips
+## License
 
-- First run downloads FFmpeg automatically
-- Converted files can be saved anywhere
-- Use "Original" to keep source resolution/framerate
-- Timecode is based on video PTS (Presentation Timestamp)
-
-## Common Issues
-
-**Error: "customtkinter not found"**
-```bash
-pip3 install customtkinter
-```
-
-**Error: "ffmpeg not found"**
-```bash
-./install.sh
-```
-
-**App does not open**
-```bash
-python3 thn_converter.py
-```
+MIT
