@@ -1,17 +1,14 @@
-# FFmpeg binaries (auto-downloaded via build script)
+# FFmpeg (auto-downloaded)
 ffmpeg
-ffmpeg_downloaded_flag
 ffprobe
-*ffprobe*
+ffmpeg_downloaded_flag
 
-# Build script (not ignored)
-# download-ffmpeg.sh is tracked manually
-
-# Python dependencies
-__pycache__/
-*.pyc
-venv/
-env/
+# Xcode build
+build/
+*.xcuserdata
+*.xcworkspace
+*.xcuserstate
+*.xcscmblueprint
 
 # macOS
 .DS_Store
@@ -20,19 +17,3 @@ env/
 
 # Logs
 *.log
-
-# Build files
-*/build/
-*.xcworkspace
-*.xcodeproj/project.xcworkspace
-
-# Xcode
-*.xcuserstate
-*.xcscmblueprint
-
-# .NET / C# build artifacts
-bin/
-obj/
-*.user
-*.suo
-.vs/

@@ -65,7 +65,7 @@
 				A2000004 /* VideoConverter.swift */,
 				A2000003 /* Assets.xcassets */,
 			);
-			path = "THN-Converter";
+			path = "src";
 			sourceTree = "<group>";
 		};
 		G3000001 /* Products */ = {
@@ -237,7 +237,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "THN-Converter/THN-Converter.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "src/app.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -266,7 +266,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "THN-Converter/THN-Converter.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "src/app.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;

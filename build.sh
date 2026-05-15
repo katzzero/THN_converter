@@ -29,7 +29,6 @@ fi
 
 echo ""
 echo "🔨 Compilando o app..."
-cd THN-Converter
 
 xcodebuild -project THN-Converter.xcodeproj \
     -scheme THN-Converter \
@@ -40,10 +39,10 @@ xcodebuild -project THN-Converter.xcodeproj \
 if [ $? -eq 0 ]; then
     echo ""
     echo "✅ Build concluído com sucesso!"
-    echo "📦 App criado em: THN-Converter/build/Build/Products/Release/THN-Converter.app"
+    echo "📦 App criado em: build/Build/Products/Release/THN-Converter.app"
     echo ""
     echo "Para instalar:"
-    echo "  cp -r THN-Converter/build/Build/Products/Release/THN-Converter.app /Applications/"
+    echo "  cp -r build/Build/Products/Release/THN-Converter.app /Applications/"
 else
     echo ""
     echo "❌ Erro no build!"
