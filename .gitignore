@@ -1,14 +1,3 @@
-# FFmpeg binaries (auto-downloaded via build script)
-ffmpeg
-ffmpeg_downloaded_flag
-ffprobe
-*ffprobe*
-# C# bundled ffmpeg (download manually, not tracked in git)
-windows/ffmpeg/ffmpeg.exe
-
-# Build script (not ignored)
-# download-ffmpeg.sh is tracked manually
-
 # Python dependencies
 __pycache__/
 *.pyc
@@ -25,16 +14,7 @@ env/
 
 # Build files
 */build/
-*.xcworkspace
-*.xcodeproj/project.xcworkspace
 
 # Xcode
 *.xcuserstate
 *.xcscmblueprint
-
-# .NET / C# build artifacts
-bin/
-obj/
-*.user
-*.suo
-.vs/
