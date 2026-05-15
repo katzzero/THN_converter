@@ -4,19 +4,6 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <RootNamespace>THN_Converter_Win</RootNamespace>
-    <AssemblyName>THN-Converter-Win</AssemblyName>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </ApplicationDefinition>
-    <Page Include="**/*.xaml" Exclude="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Content Include="ffmpeg\ffmpeg.exe" CopyToOutputDirectory="PreserveNewest" Condition="Exists('ffmpeg\ffmpeg.exe')" />
-  </ItemGroup>
 
 </Project>
