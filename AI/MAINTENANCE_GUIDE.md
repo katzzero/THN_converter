@@ -6,13 +6,12 @@ This project has **3 independent implementations** across **3 branches** that mu
 
 ## Branch Architecture
 
-| Branch | Implementation | Language | UI Framework | Platform |
-|--------|--------------|----------|-------------|----------|
-| `main` | macOS native | Swift | SwiftUI | macOS |
-| `main` | Cross-platform | Python | CustomTkinter | macOS / Linux |
-| `win` | Windows native | C# | WPF (.NET 8) | Windows |
+| Branch | Implementations | Platforms |
+|--------|---------------|-----------|
+| `main` | Swift (`macos/`) + Python (`python/`) | macOS |
+| `win` | Swift (`macos/`) + Python (`python/`) + C# (`windows/`) | macOS + Windows |
 
-All three branches share a single `/AI` directory with documentation guides. Updates to AI guides happen on the branch where the change is made.
+All three implementations share a single `/AI` directory with documentation guides. Updates to AI guides happen on the branch where the change is made.
 
 ---
 
@@ -22,7 +21,7 @@ When a file changes in one implementation, the corresponding files in the other 
 
 ### Conversion Logic
 
-| Swift (main) | Python (main) | C# (win) |
+| Swift (macos/) | Python (python/) | C# (windows/) |
 |---|---|---|
 | `VideoConverter.swift` — `convert()` | `thn_converter.py` — `VideoConverter.convert()` | `Services/FfmpegService.cs` — `Convert()` |
 | `VideoConverter.swift` — `parseProgress()` | `thn_converter.py` — inline in `convert()` | `Services/FfmpegService.cs` — `ParseProgress()` |
@@ -33,7 +32,7 @@ When a file changes in one implementation, the corresponding files in the other 
 
 ### Metadata Extraction Logic
 
-| Swift (main) | Python (main) | C# (win) |
+| Swift (macos/) | Python (python/) | C# (windows/) |
 |---|---|---|
 | `VideoConverter.swift` — `extractMetadata()` | `thn_converter.py` — `extract_metadata()` | `Services/MetadataService.cs` — `ExtractMetadataAsync()` |
 | `VideoConverter.swift` — `parseFFmpegMetadata()` | `thn_converter.py` — `_parse_ffmpeg_metadata()` | `Services/MetadataService.cs` — `ParseFfmpegOutput()` |
@@ -47,7 +46,7 @@ When a file changes in one implementation, the corresponding files in the other 
 
 ### Data Models
 
-| Swift (main) | Python (main) | C# (win) |
+| Swift (macos/) | Python (python/) | C# (windows/) |
 |---|---|---|
 | `VideoConverter.swift` — `VideoMetadata` | `thn_converter.py` — `VideoMetadata` class | `Models/VideoMetadata.cs` |
 | `VideoConverter.swift` — `VideoStreamInfo` | `thn_converter.py` — `VideoStreamInfo` class | `Models/StreamInfo.cs` |
@@ -58,7 +57,7 @@ When a file changes in one implementation, the corresponding files in the other 
 
 ### UI / View Layer
 
-| Swift (main) | Python (main) | C# (win) |
+| Swift (macos/) | Python (python/) | C# (windows/) |
 |---|---|---|
 | `ContentView.swift` — body (4 tabs) | `thn_converter.py` — `ConverterApp` (4 tabs) | `MainWindow.xaml` (4 tabs) |
 | `ContentView.swift` — `handleDrop()` | `thn_converter.py` — `select_file()` | `MainWindow.xaml.cs` — `Window_Drop()` |
@@ -139,10 +138,10 @@ Files to modify across all 3 implementations:
 When a change is requested, use this order:
 
 ```
-Step 1:  Swift implementation  (main branch)
-Step 2:  Python implementation (main branch)
-Step 3:  C# implementation     (win branch)
-Step 4:  Update AI/*.json guides  (on applicable branch)
+Step 1:  Swift (macos/) — on active branch
+Step 2:  Python (python/) — on active branch
+Step 3:  C# (windows/) — on win branch only
+Step 4:  Update AI/*.json guides
 Step 5:  Verify syntax/compile for all 3
 ```
 
@@ -185,19 +184,19 @@ When any feature changes, the `/AI/*.json` guides must be updated:
 
 ## Build & Verify Commands
 
-### Swift (main branch)
+### Swift (macOS — on `main` or `win`)
 ```bash
 cd macos/THN-Converter
 xcrun swiftc -frontend -typecheck *.swift -target arm64-apple-macosx14.0 -sdk $(xcrun --show-sdk-path --sdk macosx)
 ```
 
-### Python (main branch)
+### Python (cross-platform — on `main` or `win`)
 ```bash
 cd python
 python3 -m py_compile thn_converter.py
 ```
 
-### C# (win branch)
+### C# (Windows — on `win` branch only)
 ```bash
 cd windows
 dotnet build -c Release

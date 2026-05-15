@@ -25,15 +25,15 @@
 
 ## 🎯 Overview / Visão Geral
 
-**THN Converter** is a powerful video conversion application available on **3 platforms** with **3 independent implementations**, all sharing the same FFmpeg backend:
+**THN Converter** is a video conversion application available in **3 implementations** sharing the same FFmpeg backend:
 
-| Platform | Language | Framework | Directory |
-|----------|----------|-----------|-----------|
-| **macOS** | Swift | SwiftUI | `macos/` |
-| **Windows** | C# | WPF (.NET 8) | `windows/` |
-| **Cross-platform** | Python | CustomTkinter | `python/` |
+| Language | Framework | Location | Branch |
+|----------|-----------|----------|--------|
+| **Swift** | SwiftUI | `macos/` | `main` + `win` |
+| **Python** | CustomTkinter | `python/` | `main` + `win` |
+| **C#** | WPF (.NET 8) | `windows/` | `win` |
 
-All three implementations are **feature-equal** and maintained in sync via the `win` branch.
+The Python implementation lives as a folder within both branches — it is **not** a separate branch. All three are kept feature-equal via the sync rules in `AI/MAINTENANCE_GUIDE.md`.
 
 ---
 
