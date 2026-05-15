@@ -9,11 +9,17 @@ windows/ffmpeg/ffmpeg.exe
 # Build script (not ignored)
 # download-ffmpeg.sh is tracked manually
 
-# Python dependencies
-__pycache__/
-*.pyc
-venv/
-env/
+# FFmpeg binaries (download manually for Windows)
+ffmpeg/
+ffmpeg.exe
+ffprobe.exe
+
+# .NET / C# build artifacts
+bin/
+obj/
+*.user
+*.suo
+.vs/
 
 # macOS
 .DS_Store
@@ -22,15 +28,6 @@ env/
 
 # Logs
 *.log
-
-# Build files
-*/build/
-*.xcworkspace
-*.xcodeproj/project.xcworkspace
-
-# Xcode
-*.xcuserstate
-*.xcscmblueprint
 
 # .NET / C# build artifacts
 bin/
