@@ -1,102 +1,102 @@
-# THN Converter - Versão Python 🐍
+# THN Converter for Python
 
-Versão portátil do conversor de vídeo em Python com interface gráfica moderna.
+Portable video converter in Python with modern graphical interface.
 
-## ✨ Features
+## Features
 
-- ✅ Interface moderna e responsiva (dark/light mode)
-- ✅ Drag & drop de arquivos
-- ✅ Múltiplos codecs de vídeo (H.264, H.265, ProRes, DNxHD, VP9)
-- ✅ Controle de resolução, framerate e qualidade (CRF)
-- ✅ Codecs de áudio independentes
-- ✅ Overlay de timecode queimado no vídeo
-- ✅ Barra de progresso em tempo real
-- ✅ Log de conversão detalhado
-- ✅ Otimizado para Apple Silicon
-- ✅ Escolha personalizada do local de salvamento
-- ✅ Configurações de áudio somente quando necessário
-- ✅ Interface otimizada com grid de opções
+- Modern and responsive interface (dark/light mode)
+- Drag & drop file support
+- Multiple video codecs (H.264, H.265, ProRes, DNxHD, VP9)
+- Resolution, framerate, and quality (CRF) control
+- Independent audio codecs
+- Timecode overlay burned into video
+- Real-time progress bar
+- Detailed conversion log
+- Optimized for Apple Silicon
+- Custom save location selection
+- Audio settings only when needed
+- Optimized grid layout interface
 
-## 🚀 Instalação Rápida
+## Quick Installation
 
 ```bash
-# 1. Instale as dependências e baixe o FFmpeg
+# 1. Install dependencies and download FFmpeg
 ./install.sh
 
-# 2. Rode o app
+# 2. Run the app
 python3 thn_converter.py
 ```
 
-## 📦 Criar App Instalável
+## Create Installable App
 
 ```bash
-# Criar app bundle
+# Create app bundle
 ./create-app.sh
 
-# Instalar no Applications
+# Install in Applications
 cp -r THN-Converter.app /Applications/
 ```
 
-## 🎯 Uso
+## Usage
 
-1. **Abra o app** (via terminal ou ícone)
-2. **Arraste** um vídeo ou clique em "Selecionar Arquivo"
-3. **Selecione o local de salvamento** (ou aceite o padrão)
-4. **Configure** as opções:
-   - Codec de vídeo
-   - Qualidade (CRF)
-   - Resolução (4K, Full HD, HD, SD, Original)
+1. Open the app (via terminal or icon)
+2. Drag a video or click "Select File"
+3. Choose save location (or accept default)
+4. Configure options:
+   - Video codec
+   - Quality (CRF)
+   - Resolution (4K, Full HD, HD, SD, Original)
    - Framerate (60, 30, 24, etc)
-   - Codec de áudio
-   - Bitrate de áudio (aparece apenas se não for "copy")
+   - Audio codec
+   - Audio bitrate (appears only if not "copy")
    - Sample rate
-   - Timecode overlay (opcional)
-5. **Clique em "Converter"**
-6. **Aguarde** - arquivo salvo no local escolhido
+   - Timecode overlay (optional)
+5. Click "Convert"
+6. Wait - file saved to chosen location
 
-## 📁 Estrutura
+## Structure
 
 ```
 THN-Converter-Python/
-├── thn_converter.py      # App principal
-├── requirements.txt      # Dependências Python
-├── install.sh           # Script de instalação
-├── create-app.sh        # Criar app bundle
-└── ffmpeg              # FFmpeg binário (baixado automaticamente)
+├── thn_converter.py      # Main app
+├── requirements.txt      # Python dependencies
+├── install.sh           # Installation script
+├── create-app.sh        # App bundle creation
+└── ffmpeg              # FFmpeg binary (downloaded automatically)
 ```
 
-## 🔧 Requisitos
+## Requirements
 
 - macOS 13.0+
-- Python 3.8+ (já vem no macOS)
-- pip3 (gerenciador de pacotes Python)
+- Python 3.8+
+- pip3 (Python package manager)
 
-## 🎨 Tecnologias
+## Technologies
 
-- **CustomTkinter** - Interface moderna
-- **FFmpeg** - Engine de conversão
-- **Python 3** - Linguagem
+- **CustomTkinter** - Modern interface
+- **FFmpeg** - Conversion engine
+- **Python 3** - Language
 
-## 💡 Dicas
+## Tips
 
-- A primeira execução baixa o FFmpeg automaticamente
-- Os arquivos convertidos podem ser salvos em qualquer local
-- Use "Original" para manter resolução/framerate do arquivo fonte
-- Timecode é baseado no PTS (Presentation Timestamp) do vídeo
+- First run downloads FFmpeg automatically
+- Converted files can be saved anywhere
+- Use "Original" to keep source resolution/framerate
+- Timecode is based on video PTS (Presentation Timestamp)
 
-## 🐛 Problemas Comuns
+## Common Issues
 
-**Erro: "customtkinter not found"**
+**Error: "customtkinter not found"**
 ```bash
 pip3 install customtkinter
 ```
 
-**Erro: "ffmpeg not found"**
+**Error: "ffmpeg not found"**
 ```bash
 ./install.sh
 ```
 
-**App não abre**
+**App does not open**
 ```bash
 python3 thn_converter.py
 ```
