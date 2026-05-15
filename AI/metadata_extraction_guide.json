@@ -12,7 +12,7 @@
   
   "files_to_modify": [
     {
-      "file": "thn-converter/THN-Converter/ContentView.swift",
+      "file": "macos/THN-Converter/ContentView.swift",
       "action": "FIX_DUPLICATE_CODE + ADD_METADATA",
       "implementation": {
         "lines_modified": "441-480 (removed duplicate), 15-16 (state), 534-673 (Info Tab UI)",
@@ -22,7 +22,7 @@
       "status": "IMPLEMENTED"
     },
     {
-      "file": "thn-converter/THN-Converter/VideoConverter.swift",
+      "file": "macos/THN-Converter/VideoConverter.swift",
       "action": "ADD_METADATA_EXTRACTION",
       "implementation": {
         "lines_added": "23-69 (structs), 272-662 (extraction methods)",
@@ -50,10 +50,10 @@
     "status": "IMPLEMENTED",
     "implementation_date": "2026-05-13",
     "files_created": [
-      "win/THN-Converter-Win/Services/MetadataService.cs",
-      "win/THN-Converter-Win/Models/VideoMetadata.cs",
-      "win/THN-Converter-Win/Models/StreamInfo.cs",
-      "win/THN-Converter-Win/Models/ColorSpaceInfo.cs"
+      "windows/Services/MetadataService.cs",
+      "windows/Models/VideoMetadata.cs",
+      "windows/Models/StreamInfo.cs",
+      "windows/Models/ColorSpaceInfo.cs"
     ],
     "key_differences_from_swift": {
       "types": "TimeInterval → TimeSpan",

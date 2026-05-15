@@ -6,7 +6,7 @@
 
   "source_structure": {
     "swift_implementation": {
-      "root": "thn-converter/THN-Converter/",
+      "root": "macos/THN-Converter/",
       "entry_point": "THN_ConverterApp.swift",
       "main_files": [
         {
@@ -24,12 +24,12 @@
       ]
     },
     "python_implementation": {
-      "root": "THN-Converter-Python/",
+      "root": "python/",
       "entry_point": "thn_converter.py",
       "purpose": "Alternative Python GUI implementation using CustomTkinter"
     },
     "csharp_implementation": {
-      "root": "win/THN-Converter-Win/",
+      "root": "windows/",
       "entry_point": "MainWindow.xaml",
       "framework": "WPF (.NET 8)",
       "main_files": [
@@ -181,10 +181,10 @@
   },
 
   "build_commands": {
-    "swift": "xcodebuild -project thn-converter/THN-Converter.xcodeproj -scheme THN-Converter -configuration Debug build",
+    "swift": "xcodebuild -project macos/THN-Converter.xcodeproj -scheme THN-Converter -configuration Debug build",
     "python": "cd THN-Converter-Python && python3 thn_converter.py",
-    "csharp": "dotnet build win/THN-Converter-Win/THN-Converter-Win.csproj -c Release",
-    "csharp_publish": "dotnet publish win/THN-Converter-Win/THN-Converter-Win.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true",
+    "csharp": "dotnet build windows/THN-Converter-Win.csproj -c Release",
+    "csharp_publish": "dotnet publish windows/THN-Converter-Win.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true",
     "download_ffmpeg": "./download-ffmpeg.sh"
   },
 

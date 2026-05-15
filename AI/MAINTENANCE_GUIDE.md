@@ -189,19 +189,19 @@ When any feature changes, the `/AI/*.json` guides must be updated:
 
 ### Swift (main branch)
 ```bash
-cd thn-converter/THN-Converter
+cd macos/THN-Converter
 xcrun swiftc -frontend -typecheck *.swift -target arm64-apple-macosx14.0 -sdk $(xcrun --show-sdk-path --sdk macosx)
 ```
 
 ### Python (main branch)
 ```bash
-cd THN-Converter-Python
+cd python
 python3 -m py_compile thn_converter.py
 ```
 
 ### C# (win branch)
 ```bash
-cd win/THN-Converter-Win
+cd windows
 dotnet build -c Release
 # or for single-file publish:
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
