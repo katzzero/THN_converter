@@ -24,8 +24,8 @@
     "git_state": {
         "branch": "win",
         "last_commit": "HEAD",
-        "last_commit_date": "2026-05-13",
-        "last_commit_msg": "Port C# WPF Windows app + update AI guides"
+        "last_commit_date": "2026-05-15",
+        "last_commit_msg": "Add Python metadata extraction + Info tab, bring all 3 to feature parity"
     },
     "dependencies": {
         "Swift": [
@@ -262,24 +262,24 @@
     "instructions_for_ai": {
         "purpose": "Como usar este JSON para modificar o projeto de forma estruturada",
         "modify_json_rules": [
-            "Sempre mantenha a sintaxe JSON válida (aspas duplas, sem vírgulas finais)",
-            "Ao adicionar feature, atualize: features[], troubleshooting se necessário",
+            "Sempre mantenha a sintaxe JSON v\u00e1lida (aspas duplas, sem v\u00edrgulas finais)",
+            "Ao adicionar feature, atualize: features[], troubleshooting se necess\u00e1rio",
             "Ao remover arquivo, registre em file_metadata.removed_files",
-            "Atualize last_modified com a data da modificação",
+            "Atualize last_modified com a data da modifica\u00e7\u00e3o",
             "Use status: 'NEW' | 'IN_PROGRESS' | 'COMPLETE' | 'KNOWN_ISSUE'"
         ],
         "modification_priority": {
-            "phase_1": "Corrigir bugs críticos (progresso, cancelamento, FFmpeg) - COMPLETE",
-            "phase_2": "Melhorias de UX (font fallback, validação de entrada, erros melhores)",
-            "phase_3": "Refatoração (extrair configurações, testes, internacionalização)",
-            "phase_4": "Otimização (cache, performance, maior tamanho)"
+            "phase_1": "Corrigir bugs cr\u00edticos (progresso, cancelamento, FFmpeg) - COMPLETE",
+            "phase_2": "Melhorias de UX (font fallback, valida\u00e7\u00e3o de entrada, erros melhores)",
+            "phase_3": "Refatora\u00e7\u00e3o (extrair configura\u00e7\u00f5es, testes, internacionaliza\u00e7\u00e3o)",
+            "phase_4": "Otimiza\u00e7\u00e3o (cache, performance, maior tamanho)"
         },
-        "state_tracking": "Use ai_context para marcar o que já foi feito e o que falta. Sempre atualize last_sync quando modificar uma feature em todas as versões",
+        "state_tracking": "Use ai_context para marcar o que j\u00e1 foi feito e o que falta. Sempre atualize last_sync quando modificar uma feature em todas as vers\u00f5es",
         "safe_modification_workflow": [
             "1. Ler project_structure.json primeiro - entender o projeto inteiro",
-            "2. Identificar quais arquivos serão afetados via file_relationships",
-            "3. Verificar conventions para manter padrões existentes",
-            "4. Implementar modificação em Swift (principal) e Python (se aplicável)",
+            "2. Identificar quais arquivos ser\u00e3o afetados via file_relationships",
+            "3. Verificar conventions para manter padr\u00f5es existentes",
+            "4. Implementar modifica\u00e7\u00e3o em Swift (principal) e Python (se aplic\u00e1vel)",
             "5. Atualizar features, troubleshooting e ai_context no JSON",
             "6. Testar build (Swift) ou rodar app (Python)",
             "7. Atualizar changelog e last_sync"
@@ -295,92 +295,92 @@
         "naming": {
             "swift": "camelCase, VideoConverter.swift, mapVideoCodec(), getTimecodeFilter()",
             "python": "snake_case, thn_converter.py, get_timecode_filter()",
-            "ffmpeg_flags": "Usar -preset, -crf, -c:v, -c:a padrão do FFmpeg"
+            "ffmpeg_flags": "Usar -preset, -crf, -c:v, -c:a padr\u00e3o do FFmpeg"
         },
         "structure": {
-            "swift_ui": "TabView com 3 tabs: Principal (drop zone, convert, log), Opções (settings), Log (FFmpeg output)",
+            "swift_ui": "TabView com 3 tabs: Principal (drop zone, convert, log), Op\u00e7\u00f5es (settings), Log (FFmpeg output)",
             "ffmpeg_integration": "FFmpeg sempre copiado para bundle via CopyFiles phase, buscado via Bundle.main.path",
             "progress": "parseDuration() primeiro, depois currentTime/duration (NUNCA divisor fixo)",
-            "timecode": "Usar text='%{gmtime:%H:%M:%S}' em todas as versões, nunca %{pts:HMS}"
+            "timecode": "Usar text='%{gmtime:%H:%M:%S}' em todas as vers\u00f5es, nunca %{pts:HMS}"
         },
         "sync_requirement": [
             "Ao adicionar codec, atualizar: VideoConverter.mapVideoCodec() + ContentView picker + thn_converter codec list",
             "Ao mexer em timecode, atualizar: Swift getTimecodeFilter() + Python get_timecode_filter()",
             "Ao mexer em progress, atualizar: Swift parseProgress() + Python duration parsing",
-            "Qualquer bug fix DEVE ser aplicado em ambas as versões (Swift e Python)"
+            "Qualquer bug fix DEVE ser aplicado em ambas as vers\u00f5es (Swift e Python)"
         ]
     },
     "workflow": {
         "priorities": {
-            "must_fix": "Bugs que quebram a conversão ou travam o app (ex: FFmpeg error, progress frozen)",
-            "should_improve": "UX, validação de entrada, mensagens de erro claras",
-            "nice_to_have": "Refatoração, testes unitários, internacionalização, otimização"
+            "must_fix": "Bugs que quebram a convers\u00e3o ou travam o app (ex: FFmpeg error, progress frozen)",
+            "should_improve": "UX, valida\u00e7\u00e3o de entrada, mensagens de erro claras",
+            "nice_to_have": "Refatora\u00e7\u00e3o, testes unit\u00e1rios, internacionaliza\u00e7\u00e3o, otimiza\u00e7\u00e3o"
         },
         "modification_checklist": {
             "add_feature": [
                 "Identificar arquivos afetados via file_relationships",
                 "Implementar em Swift (principal) e Python (alternativa)",
                 "Atualizar project_structure.json com nova feature",
-                "Verificar se não quebrou funcionalidade existente",
+                "Verificar se n\u00e3o quebrou funcionalidade existente",
                 "Atualizar ai_context e changelog"
             ],
             "fix_bug": [
                 "Identificar raiz do problema",
-                "Corrigir em ambas as versões (Swift e Python)",
+                "Corrigir em ambas as vers\u00f5es (Swift e Python)",
                 "Adicionar a troubleshooting com status 'FIXED'",
                 "Testar build (Swift) ou rodar (Python) antes de commit",
                 "Atualizar changelog e last_sync"
             ],
             "refactor": [
                 "Identificar escopo e impacto",
-                "Manter API pública inalterada",
-                "Verificar se ambas as versões ficam consistentes",
-                "Testar fluxo completo de conversão após refatoração"
+                "Manter API p\u00fablica inalterada",
+                "Verificar se ambas as vers\u00f5es ficam consistentes",
+                "Testar fluxo completo de convers\u00e3o ap\u00f3s refatora\u00e7\u00e3o"
             ]
         },
         "validation_steps": [
             "Build passou em Xcode?",
             "App Python rodou sem erros?",
-            "ffmpeg está disponível no bundle?",
-            "Conversão funciona em todos os codecs? Testar cada um?",
-            "Timecode overlay aparece no vídeo?",
+            "ffmpeg est\u00e1 dispon\u00edvel no bundle?",
+            "Convers\u00e3o funciona em todos os codecs? Testar cada um?",
+            "Timecode overlay aparece no v\u00eddeo?",
             "Cancelamento funciona?",
-            "project_structure.json atualizado com mudanças?"
+            "project_structure.json atualizado com mudan\u00e7as?"
         ]
     },
     "sync_rules": {
         "when_to_sync": "Quando qualquer funcionalidade for adicionada ou modificada, aplicar em Swift e Python",
         "sync_checklist": [
-            "Swift e Python têm os mesmos codecs mapeados?",
-            "Swift e Python têm o mesmo parseProgress()?",
+            "Swift e Python t\u00eam os mesmos codecs mapeados?",
+            "Swift e Python t\u00eam o mesmo parseProgress()?",
             "Swift e Python usam o mesmo timecode format?",
-            "Swift e Python têm os mesmos erros documentados?",
-            "Swift e Python têm a mesma UI behavior?"
+            "Swift e Python t\u00eam os mesmos erros documentados?",
+            "Swift e Python t\u00eam a mesma UI behavior?"
         ],
-        "ffmpeg": "Sempre manter ffmpeg auto-download funcionando em ambas as versões",
-        "timecode_format": "Usar text='%{gmtime:%H:%M:%S}' em todas as versões (nunca %{pts:HMS})",
+        "ffmpeg": "Sempre manter ffmpeg auto-download funcionando em ambas as vers\u00f5es",
+        "timecode_format": "Usar text='%{gmtime:%H:%M:%S}' em todas as vers\u00f5es (nunca %{pts:HMS})",
         "progress_calculation": "Usar currentTime/duration (NUNCA divisor fixo de 36000)"
     },
     "validation_rules": {
         "json_validity": [
             "Validar com: python3 -m json.tool project_structure.json",
-            "Não usar vírgulas finais em arrays ou objetos",
+            "N\u00e3o usar v\u00edrgulas finais em arrays ou objetos",
             "Usar aspas duplas em chaves e valores",
             "Arrays e objetos devem estar fechados corretamente"
         ],
         "project_consistency": [
             "Se adicionar codec: verificar VideoConverter.mapVideoCodec()",
             "Se mexer em FFmpeg: verificar download-ffmpeg.sh e .gitignore",
-            "Se mexer em progress: verificar parseProgress() em ambas as versões",
-            "Se mexer em timecode: verificar getTimecodeFilter() em ambas as versões"
+            "Se mexer em progress: verificar parseProgress() em ambas as vers\u00f5es",
+            "Se mexer em timecode: verificar getTimecodeFilter() em ambas as vers\u00f5es"
         ],
         "pre_commit_checklist": [
             "Build passou em Xcode?",
             "Python app roda sem erros?",
-            "ffmpeg está disponível (local ou bundle)?",
+            "ffmpeg est\u00e1 dispon\u00edvel (local ou bundle)?",
             "project_structure.json foi atualizado?",
-            "Changelog refletiu todas as mudanças?",
-            "Commits têm mensagens claras e descritivas?"
+            "Changelog refletiu todas as mudan\u00e7as?",
+            "Commits t\u00eam mensagens claras e descritivas?"
         ]
     },
     "changelog": {
@@ -554,10 +554,11 @@
             "Phase-3: Rebuild Info Tab (ContentView.swift needs rewrite with metadata feature)",
             "Phase-3: Input validation (file size limit, valid codec check)",
             "Phase-3: Error handling improvements (better FFmpeg error parsing)",
-            "Phase-3: Build target alignment (13.0 → 14.6)",
+            "Phase-3: Build target alignment (13.0 \u2192 14.6)",
             "Windows C# port: Download ffmpeg.exe and place in windows/ffmpeg/",
             "Windows C# port: Build and test on Windows with Visual Studio 2022 or 'dotnet build'",
-            "Windows C# port: Create installer or publish as single-file exe"
+            "Windows C# port: Create installer or publish as single-file exe",
+            "Python metadata extraction implemented: verify parity across all 3 platforms"
         ]
     },
     "csharp_implementation": {
@@ -581,15 +582,25 @@
             "service": "Services/FfmpegService.cs",
             "method": "System.Diagnostics.Process with event-based stdout/stderr reading",
             "progress": "IProgress<double> callback + INotifyPropertyChanged update",
-            "font_resolution": "C:/Windows/Fonts/ with multiple fallback paths (arial → segoeui → tahoma → verdana → trebuc)",
-            "path_resolution": "Bundled ./ffmpeg/ffmpeg.exe → %LOCALAPPDATA% → Program Files → system PATH"
+            "font_resolution": "C:/Windows/Fonts/ with multiple fallback paths (arial \u2192 segoeui \u2192 tahoma \u2192 verdana \u2192 trebuc)",
+            "path_resolution": "Bundled ./ffmpeg/ffmpeg.exe \u2192 %LOCALAPPDATA% \u2192 Program Files \u2192 system PATH"
         },
         "metadata_extraction": {
             "service": "Services/MetadataService.cs",
             "method": "async Task with Process + ErrorDataReceived event",
             "regex": "C# 11 source-generated Regex (partial class with [GeneratedRegex])",
-            "parsed_fields": ["Duration", "Bitrate", "Container", "VideoStreams", "AudioStreams", "SubtitleStreams", "DataStreams", "ColorSpace", "Timecode"],
-            "hdr_detection": "Same cascade logic as Swift: smpte2084 → hlg → smpte431/432"
+            "parsed_fields": [
+                "Duration",
+                "Bitrate",
+                "Container",
+                "VideoStreams",
+                "AudioStreams",
+                "SubtitleStreams",
+                "DataStreams",
+                "ColorSpace",
+                "Timecode"
+            ],
+            "hdr_detection": "Same cascade logic as Swift: smpte2084 \u2192 hlg \u2192 smpte431/432"
         }
     }
 }

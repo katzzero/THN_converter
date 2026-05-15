@@ -169,6 +169,311 @@ class VideoConverter:
         if self.process:
             self.process.terminate()
 
+    # ── Metadata Extraction ────────────────────────────────────────
+
+    def extract_metadata(self, input_path):
+        process = subprocess.Popen(
+            [self.ffmpeg_path, "-i", input_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            encoding='utf-8',
+            errors='replace'
+        )
+        stdout, stderr = process.communicate()
+        output = stderr if stderr else stdout
+        return self._parse_ffmpeg_metadata(output, Path(input_path).name)
+
+    def _parse_ffmpeg_metadata(self, output, filename):
+        metadata = VideoMetadata(filename=filename)
+        lines = output.split('\n')
+
+        for line in lines:
+            if 'Duration:' in line:
+                match = re.search(r'Duration: (\d+):(\d+):(\d+\.\d+)', line)
+                if match:
+                    h, m, s = map(float, match.groups())
+                    metadata.duration = h * 3600 + m * 60 + s
+                bitrate_match = re.search(r'bitrate: (\d+) kb/s', line)
+                if bitrate_match:
+                    metadata.bitrate = int(bitrate_match.group(1))
+
+            if 'Input #0,' in line:
+                parts = line.split('Input #0, ', 1)
+                if len(parts) > 1:
+                    metadata.container = parts[1].split(',')[0].strip()
+
+            if 'Stream #0:' in line:
+                if 'Video:' in line:
+                    info = self._parse_video_stream(line)
+                    if info:
+                        metadata.video_streams.append(info)
+                elif 'Audio:' in line:
+                    info = self._parse_audio_stream(line)
+                    if info:
+                        metadata.audio_streams.append(info)
+                elif 'Subtitle:' in line:
+                    info = self._parse_subtitle_stream(line)
+                    if info:
+                        metadata.subtitle_streams.append(info)
+                elif 'Data:' in line:
+                    info = self._parse_data_stream(line)
+                    if info:
+                        metadata.data_streams.append(info)
+
+            if 'timecode' in line and ':' in line:
+                tc_match = re.search(r'timecode\s*:\s*([\d:;]+)', line, re.IGNORECASE)
+                if tc_match:
+                    metadata.timecode = tc_match.group(0).strip()
+
+        if metadata.video_streams:
+            for line in lines:
+                if 'Stream #0:' in line and 'Video:' in line:
+                    cs = self._extract_color_space_info(line)
+                    if cs:
+                        metadata.color_space = cs
+                        break
+
+        return metadata
+
+    def _parse_video_stream(self, line):
+        info = VideoStreamInfo()
+
+        index_match = re.search(r'Stream #0:(\d+)', line)
+        if index_match:
+            info.index = int(index_match.group(1))
+
+        codec_match = re.search(r'Video: ([a-z0-9_]+)', line)
+        if codec_match:
+            info.codec = codec_match.group(1)
+
+        profile_match = re.search(r'\(([^)]+)\)', line)
+        if profile_match:
+            info.profile = profile_match.group(1).strip()
+
+        res_match = re.search(r'(\d+)x(\d+)', line)
+        if res_match:
+            info.resolution = res_match.group(0)
+
+        pixel_match = re.search(r'([a-z0-9]+)(?:\([^)]+\))?', line)
+        if pixel_match:
+            pf = pixel_match.group(1).strip()
+            if pf and pf != ',':
+                info.pixel_format = pf
+
+        if ' fps' in line:
+            parts = line.split(' fps')
+            rate_str = parts[0].split()[-1] if parts[0].split() else None
+            if rate_str:
+                info.frame_rate = rate_str.strip() + ' fps'
+
+        bitrate_match = re.search(r'(\d+) kb/s', line)
+        if bitrate_match:
+            info.bitrate = int(bitrate_match.group(1))
+
+        sar_match = re.search(r'SAR (\d+:\d+)', line)
+        info.sar = sar_match.group(1) if sar_match else 'N/A'
+
+        dar_match = re.search(r'DAR (\d+:\d+)', line)
+        info.dar = dar_match.group(1) if dar_match else 'N/A'
+
+        color_match = re.search(r'(tv|pc),\s*\w{2,6}', line)
+        if color_match:
+            parts = color_match.group(0).split(', ')
+            if len(parts) >= 2:
+                info.color_range = parts[0]
+                info.color_space = parts[1]
+
+        primaries_match = re.search(r'(bt709|bt2020|smpte431|smpte432|bt601)', line)
+        if primaries_match:
+            info.color_primaries = primaries_match.group(1)
+
+        transfer_match = re.search(r'(bt709|smpte2084|hlg)', line)
+        if transfer_match:
+            info.color_transfer = transfer_match.group(1)
+
+        info.is_hdr = self._hdr_format(info.color_transfer, info.color_primaries) is not None
+        return info
+
+    def _parse_audio_stream(self, line):
+        info = AudioStreamInfo()
+
+        index_match = re.search(r'Stream #0:(\d+)', line)
+        if index_match:
+            info.index = int(index_match.group(1))
+
+        codec_match = re.search(r'Audio: ([a-z0-9_]+)', line)
+        if codec_match:
+            info.codec = codec_match.group(1)
+
+        sample_match = re.search(r'(\d+) Hz', line)
+        if sample_match:
+            info.sample_rate = int(sample_match.group(1))
+
+        channels_match = re.search(r'mono|stereo|5\.1|5\.1\(|6 channels|8 channels', line)
+        info.channels = channels_match.group(0) if channels_match else 'mono'
+
+        bitrate_match = re.search(r'(\d+) kb/s', line)
+        if bitrate_match:
+            info.bitrate = int(bitrate_match.group(1))
+
+        if 'und)' in line:
+            info.language = 'und'
+        else:
+            lang_match = re.search(r'\(([a-z]{3})\)', line)
+            if lang_match:
+                info.language = lang_match.group(1)
+
+        return info
+
+    def _parse_subtitle_stream(self, line):
+        info = SubtitleStreamInfo()
+
+        index_match = re.search(r'Stream #0:(\d+)', line)
+        if index_match:
+            info.index = int(index_match.group(1))
+
+        codec_match = re.search(r'Subtitle: ([a-z0-9_]+)', line)
+        if codec_match:
+            info.codec = codec_match.group(1)
+
+        if 'und)' in line:
+            info.language = 'und'
+
+        return info
+
+    def _parse_data_stream(self, line):
+        info = DataStreamInfo()
+
+        index_match = re.search(r'Stream #0:(\d+)', line)
+        if index_match:
+            info.index = int(index_match.group(1))
+
+        type_match = re.search(r'Data: ([a-z0-9_]+)', line)
+        if type_match:
+            t = type_match.group(1)
+            info.type = t
+            info.codec = t if t != 'none' else None
+
+        if 'tmcd' in line:
+            info.type = 'tmcd'
+        elif 'timecode' in line:
+            info.type = 'timecode'
+
+        return info
+
+    def _extract_color_space_info(self, line):
+        if 'tv,' not in line and 'pc,' not in line:
+            return None
+
+        info = ColorSpaceInfo()
+
+        range_match = re.search(r'(tv|pc),', line)
+        if range_match:
+            info.range = range_match.group(1)
+
+        space_match = re.search(r',\s*([a-z]{2,6})/', line)
+        if space_match:
+            info.space = space_match.group(1)
+
+        primaries_match = re.search(r'(bt709|bt2020|smpte431|smpte432|bt601)', line)
+        if primaries_match:
+            info.primaries = primaries_match.group(1)
+
+        transfer_match = re.search(r'(bt709|smpte2084|hlg)', line)
+        if transfer_match:
+            info.transfer = transfer_match.group(1)
+
+        hdr = self._hdr_format(info.transfer, info.primaries)
+        if hdr:
+            info.is_hdr = True
+            info.hdr_format = hdr
+
+        return info if info.range else None
+
+    def _hdr_format(self, transfer, primaries):
+        if transfer == 'smpte2084':
+            return 'HDR10'
+        elif transfer == 'hlg':
+            return 'Hybrid Log-Gamma'
+        elif primaries in ('smpte431', 'smpte432'):
+            return 'HDR (Unknown Format)'
+        return None
+
+    def format_duration(self, seconds):
+        seconds = int(seconds)
+        h = seconds // 3600
+        m = (seconds % 3600) // 60
+        s = seconds % 60
+        if h > 0:
+            return f"{h:02d}:{m:02d}:{s:02d}"
+        return f"{m:02d}:{s:02d}"
+
+
+# ── Metadata Data Classes ──────────────────────────────────────────
+
+class VideoMetadata:
+    def __init__(self, filename=''):
+        self.filename = filename
+        self.duration = 0.0
+        self.bitrate = None
+        self.container = None
+        self.video_streams = []
+        self.audio_streams = []
+        self.subtitle_streams = []
+        self.data_streams = []
+        self.timecode = None
+        self.color_space = None
+        self.error = None
+
+class VideoStreamInfo:
+    def __init__(self):
+        self.index = 0
+        self.codec = ''
+        self.profile = ''
+        self.resolution = ''
+        self.pixel_format = ''
+        self.frame_rate = ''
+        self.bitrate = None
+        self.sar = 'N/A'
+        self.dar = 'N/A'
+        self.color_range = None
+        self.color_space = None
+        self.color_primaries = None
+        self.color_transfer = None
+        self.is_hdr = False
+
+class AudioStreamInfo:
+    def __init__(self):
+        self.index = 0
+        self.codec = ''
+        self.sample_rate = 0
+        self.channels = ''
+        self.bitrate = None
+        self.language = None
+
+class SubtitleStreamInfo:
+    def __init__(self):
+        self.index = 0
+        self.codec = ''
+        self.language = None
+
+class DataStreamInfo:
+    def __init__(self):
+        self.index = 0
+        self.type = ''
+        self.codec = None
+
+class ColorSpaceInfo:
+    def __init__(self):
+        self.range = ''
+        self.space = ''
+        self.primaries = ''
+        self.transfer = ''
+        self.is_hdr = False
+        self.hdr_format = None
+
+
 class ConverterApp(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -184,6 +489,8 @@ class ConverterApp(ctk.CTk):
         self.output_file = None
         self.is_converting = False
         self.converter = VideoConverter()
+        self.file_metadata = None
+        self.is_fetching_metadata = False
         
         self.create_widgets()
     
@@ -203,6 +510,10 @@ class ConverterApp(ctk.CTk):
         # Tab 3: Log
         tab_log = self.tab_bar.add_tab("Log")
         self.create_log_tab(tab_log)
+        
+        # Tab 4: Info
+        tab_info = self.tab_bar.add_tab("Info")
+        self.create_info_tab(tab_info)
     
     def create_principal_tab(self, parent):
         """Tab 1: Principal - Drop zone, destinations, progress"""
@@ -403,6 +714,119 @@ class ConverterApp(ctk.CTk):
         
         self.log_frame = None  # Prevent duplicates
     
+    def create_info_tab(self, parent):
+        """Tab 4: Info - Technical metadata display"""
+        parent.grid_columnconfigure(0, weight=1)
+        
+        self.metadata_container = ctk.CTkScrollableFrame(parent)
+        self.metadata_container.grid(row=0, column=0, padx=15, pady=15, sticky="nsew")
+        
+        self.metadata_label = ctk.CTkLabel(
+            self.metadata_container,
+            text="",
+            font=ctk.CTkFont(size=12),
+            justify="left",
+            anchor="w"
+        )
+        self.metadata_label.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        self.metadata_load_label = ctk.CTkLabel(
+            parent,
+            text="",
+            font=ctk.CTkFont(size=14)
+        )
+    
+    def update_metadata_display(self):
+        """Refresh the Info tab with current metadata."""
+        self.metadata_container.delete("metadata_label")
+        
+        if self.is_fetching_metadata:
+            self.metadata_label.configure(text="Extraindo metadados...\nAguarde enquanto analisamos o arquivo")
+            return
+        
+        metadata = self.file_metadata
+        if not metadata:
+            self.metadata_label.configure(
+                text="Nenhum arquivo selecionado\n\nArraste ou selecione um arquivo para ver os detalhes técnicos"
+            )
+            return
+        
+        if metadata.error:
+            self.metadata_label.configure(
+                text=f"❌ Erro ao carregar metadados\n\n{metadata.error}\n\nSelecione o arquivo novamente para tentar de novo."
+            )
+            return
+        
+        lines = []
+        lines.append(f"📄 FILE")
+        lines.append(f"  Nome: {metadata.filename}")
+        lines.append(f"  Container: {metadata.container or 'desconhecido'}")
+        lines.append(f"  Duração: {self.converter.format_duration(metadata.duration)}")
+        if metadata.bitrate:
+            lines.append(f"  Bitrate total: {metadata.bitrate} kb/s")
+        lines.append(f"  {len(metadata.video_streams)} vídeo(s) | {len(metadata.audio_streams)} áudio(s) | "
+                     f"{len(metadata.subtitle_streams)} legenda(s) | {len(metadata.data_streams)} dados")
+        lines.append("")
+        
+        if metadata.color_space:
+            cs = metadata.color_space
+            lines.append("🎨 COLOR SPACE")
+            lines.append(f"  Range: {cs.range}")
+            lines.append(f"  Espaço: {cs.space}")
+            lines.append(f"  Primárias: {cs.primaries}")
+            lines.append(f"  Transferência: {cs.transfer}")
+            if cs.is_hdr:
+                lines.append(f"  HDR: {cs.hdr_format or 'Sim'}")
+            else:
+                lines.append("  SDR")
+            lines.append("")
+        
+        if metadata.timecode:
+            lines.append(f"⏱️ TIMECODE")
+            lines.append(f"  {metadata.timecode}")
+            lines.append("")
+        
+        for idx, stream in enumerate(metadata.video_streams):
+            lines.append(f"🎬 VIDEO STREAM #{idx}")
+            lines.append(f"  Codec: {stream.codec} ({stream.profile})")
+            lines.append(f"  Resolução: {stream.resolution} @ {stream.frame_rate}")
+            lines.append(f"  Pixel Format: {stream.pixel_format}")
+            lines.append(f"  SAR: {stream.sar}  DAR: {stream.dar}")
+            if stream.bitrate:
+                lines.append(f"  Bitrate: {stream.bitrate} kb/s")
+            if stream.color_range:
+                lines.append(f"  Color Range: {stream.color_range}")
+            if stream.is_hdr:
+                lines.append(f"  HDR: {stream.color_primaries or ''} / {stream.color_space or ''}")
+            lines.append("")
+        
+        for idx, stream in enumerate(metadata.audio_streams):
+            lines.append(f"🔊 AUDIO STREAM #{idx}")
+            lines.append(f"  Codec: {stream.codec}")
+            lines.append(f"  Sample Rate: {stream.sample_rate} Hz")
+            lines.append(f"  Channels: {stream.channels}")
+            if stream.bitrate:
+                lines.append(f"  Bitrate: {stream.bitrate} kb/s")
+            if stream.language:
+                lines.append(f"  Idioma: {stream.language}")
+            lines.append("")
+        
+        for idx, stream in enumerate(metadata.subtitle_streams):
+            lines.append(f"📝 SUBTITLE STREAM #{idx}")
+            lines.append(f"  Codec: {stream.codec}")
+            if stream.language:
+                lines.append(f"  Idioma: {stream.language}")
+            lines.append("")
+        
+        for idx, stream in enumerate(metadata.data_streams):
+            lines.append(f"📊 DATA STREAM #{idx}")
+            lines.append(f"  Type: {stream.type}")
+            if stream.codec and stream.codec != 'none':
+                lines.append(f"  Codec: {stream.codec}")
+            lines.append("")
+        
+        self.metadata_label.configure(text="\n".join(lines))
+    
     def create_setting_row(self, parent, row, label_text, variable, values):
         frame = ctk.CTkFrame(parent, fg_color="transparent")
         frame.grid(row=row, column=0, columnspan=2, padx=15, pady=5, sticky="ew")
@@ -433,6 +857,9 @@ class ConverterApp(ctk.CTk):
             self.file_label.configure(text=Path(file_path).name)
             self.drop_label.configure(text="✅ Arquivo selecionado")
             
+            # Fetch metadata in background
+            self.fetch_metadata(file_path)
+            
             # Se não foi definido output, definir padrão
             if not self.output_file:
                 output_dir = str(Path.home() / "Downloads")
@@ -456,6 +883,26 @@ class ConverterApp(ctk.CTk):
         if file_path:
             self.output_file = file_path
             self.output_label.configure(text=Path(file_path).name)
+    
+    def fetch_metadata(self, file_path):
+        def worker():
+            self.is_fetching_metadata = True
+            self.file_metadata = None
+            self.after(0, self.update_metadata_display)
+            
+            try:
+                metadata = self.converter.extract_metadata(file_path)
+                self.file_metadata = metadata
+            except Exception as e:
+                meta = VideoMetadata(filename=Path(file_path).name)
+                meta.error = str(e)
+                self.file_metadata = meta
+            finally:
+                self.is_fetching_metadata = False
+                self.after(0, self.update_metadata_display)
+        
+        thread = threading.Thread(target=worker, daemon=True)
+        thread.start()
     
     def start_conversion(self):
         if not self.dropped_file:

@@ -92,8 +92,11 @@
         "parsing_method": "Regex-based from stderr"
       },
       "python": {
-        "status": "NOT_IMPLEMENTED",
-        "note": "Metadata extraction only exists in Swift implementation"
+        "status": "IMPLEMENTED",
+        "implementation_date": "2026-05-15",
+        "flow": "ConverterApp.fetch_metadata() → VideoConverter.extract_metadata() → _parse_ffmpeg_metadata() with regex",
+        "ffmpeg_command": "ffmpeg -i <filepath> 2>&1",
+        "parsing_method": "Regex-based from stderr (same patterns as Swift and C#)"
       },
       "csharp": {
         "status": "IMPLEMENTED",

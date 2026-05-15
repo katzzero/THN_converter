@@ -5,19 +5,22 @@
   "last_modified": "2026-05-13",
   "priority": "Phase-2",
   "implementation_date": "2026-05-05",
-  
   "description": "CRITICAL BUG FIX: Fix duplicate code in convertVideo() method causing build failure. NEW FEATURE: Add automatic extraction and display of technical video metadata when file is loaded, including streams, codecs, duration, bitrate, colorspace, HDR detection, and all track information.",
-  
   "phase": "PHASE_2_COMPLETE",
-  
   "files_to_modify": [
     {
       "file": "macos/THN-Converter/ContentView.swift",
       "action": "FIX_DUPLICATE_CODE + ADD_METADATA",
       "implementation": {
         "lines_modified": "441-480 (removed duplicate), 15-16 (state), 534-673 (Info Tab UI)",
-        "functions_added": ["fetchMetadata()", "formatDuration()"],
-        "functions_modified": ["handleDrop()", "selectInputFile()"]
+        "functions_added": [
+          "fetchMetadata()",
+          "formatDuration()"
+        ],
+        "functions_modified": [
+          "handleDrop()",
+          "selectInputFile()"
+        ]
       },
       "status": "IMPLEMENTED"
     },
@@ -45,7 +48,6 @@
       "status": "COMPLETE"
     }
   ],
-  
   "csharp_port": {
     "status": "IMPLEMENTED",
     "implementation_date": "2026-05-13",
@@ -56,7 +58,7 @@
       "windows/Models/ColorSpaceInfo.cs"
     ],
     "key_differences_from_swift": {
-      "types": "TimeInterval → TimeSpan",
+      "types": "TimeInterval \u2192 TimeSpan",
       "regex": "Uses source-generated Regex (C# 11 [GeneratedRegex]) for better performance",
       "async_pattern": "async Task + TaskCompletionSource instead of Swift continuations",
       "output_capture": "RedirectStandardError + ErrorDataReceived event handler",
@@ -64,7 +66,6 @@
     },
     "regex_patterns": "All regex patterns are direct mirrors of the Swift implementation, migrated to C# [GeneratedRegex] syntax"
   },
-  
   "data_structures": {
     "VideoMetadata": {
       "filename": "String",
@@ -122,13 +123,15 @@
       "hdrFormat": "String?"
     }
   },
-  
   "technical_specs": {
     "ffmpeg_command": "ffmpeg -i <filepath> 2>&1",
     "parsing_method": "Regex-based string parsing from stderr output",
     "metadata_location": "stderr, not stdout",
     "execution_mode": "async/await with Process (Swift) / async Task (C#)",
-    "implemented_in": ["Swift (VideoConverter.swift)", "C# (Services/MetadataService.cs)"],
+    "implemented_in": [
+      "Swift (VideoConverter.swift)",
+      "C# (Services/MetadataService.cs)"
+    ],
     "stream_types": {
       "video": "Contains 'Video:' in stream line",
       "audio": "Contains 'Audio:' in stream line",
@@ -153,7 +156,6 @@
       }
     }
   },
-  
   "ui_spec": {
     "tab_position": "4 - After Log Tab",
     "tab_name": "Info",
@@ -163,40 +165,78 @@
     "sections": [
       {
         "name": "FILE",
-        "icon": "📄",
-        "contents": ["Filename", "Container", "Duration", "Bitrate", "Stream counts"]
+        "icon": "\ud83d\udcc4",
+        "contents": [
+          "Filename",
+          "Container",
+          "Duration",
+          "Bitrate",
+          "Stream counts"
+        ]
       },
       {
         "name": "COLOR SPACE",
-        "icon": "🎨",
+        "icon": "\ud83c\udfa8",
         "conditional": "Only if present",
-        "contents": ["Range (tv/pc)", "Color space", "Primaries", "Transfer function", "HDR/SDR indicator"]
+        "contents": [
+          "Range (tv/pc)",
+          "Color space",
+          "Primaries",
+          "Transfer function",
+          "HDR/SDR indicator"
+        ]
       },
       {
         "name": "TIMECODE",
-        "icon": "⏱️",
+        "icon": "\u23f1\ufe0f",
         "conditional": "Only if present",
-        "contents": ["Start time code value"]
+        "contents": [
+          "Start time code value"
+        ]
       },
       {
         "name": "VIDEO STREAMS",
-        "icon": "🎬",
-        "contents": ["Index number", "Codec + Profile", "Resolution @ framerate", "Pixel format", "SAR:DAR", "Bitrate (if present)", "Color range (if present)", "HDR indicator (if HDR)"]
+        "icon": "\ud83c\udfac",
+        "contents": [
+          "Index number",
+          "Codec + Profile",
+          "Resolution @ framerate",
+          "Pixel format",
+          "SAR:DAR",
+          "Bitrate (if present)",
+          "Color range (if present)",
+          "HDR indicator (if HDR)"
+        ]
       },
       {
         "name": "AUDIO STREAMS",
-        "icon": "🔊",
-        "contents": ["Index number", "Codec", "Sample rate", "Channels", "Bitrate (if present)", "Language (if present)"]
+        "icon": "\ud83d\udd0a",
+        "contents": [
+          "Index number",
+          "Codec",
+          "Sample rate",
+          "Channels",
+          "Bitrate (if present)",
+          "Language (if present)"
+        ]
       },
       {
         "name": "SUBTITLE STREAMS",
-        "icon": "📝",
-        "contents": ["Index number", "Codec", "Language (if present)"]
+        "icon": "\ud83d\udcdd",
+        "contents": [
+          "Index number",
+          "Codec",
+          "Language (if present)"
+        ]
       },
       {
         "name": "DATA STREAMS",
-        "icon": "📊",
-        "contents": ["Index number", "Type (tmcd, timecode)", "Codec (if not 'none')"]
+        "icon": "\ud83d\udcca",
+        "contents": [
+          "Index number",
+          "Type (tmcd, timecode)",
+          "Codec (if not 'none')"
+        ]
       }
     ],
     "states": {
@@ -206,11 +246,13 @@
       "error": "Show error message with retry button"
     }
   },
-  
   "behavior_specs": {
     "auto_refresh": {
       "when": "Every time new file is loaded",
-      "triggers": ["handleDrop()", "selectInputFile()"],
+      "triggers": [
+        "handleDrop()",
+        "selectInputFile()"
+      ],
       "behavior": "Always refresh metadata, never cache"
     },
     "error_handling": {
@@ -224,18 +266,49 @@
       "timeout": "No timeout configured initially"
     }
   },
-  
   "test_cases": [
-    {"name": "Standard MP4", "file": "H.264 + AAC", "expected_streams": "1 video, 1 audio"},
-    {"name": "MKV HDR", "file": "HEVC/H.265 Main 10 + BT.2020 + smpte2084", "expected_streams": "1 video (HDR), 1+", "expected_colorspace": "bt2020 + smpte2084"},
-    {"name": "Multi-track", "file": "ProRes + multiple audio tracks", "expected_streams": "1+ video, 2+ audio"},
-    {"name": "Audio-only", "file": "AAC file with no video track", "expected_streams": "0 video, 1+ audio"},
-    {"name": "With subtitles", "file": "File with embedded SRT/PGS subtitles", "expected_streams": "At least 1 subtitle"},
-    {"name": "With timecode", "file": "File with embedded timecode track", "expected": "timecode field populated"},
-    {"name": "DCI-P3 color space", "file": "smpte431 or smpte432 primaries", "expected_colorspace": "smpte431/smpte432 + HDR"},
-    {"name": "Corrupted file", "file": "Invalid/truncated video", "expected_behavior": "Error state shown, app doesn't crash"}
+    {
+      "name": "Standard MP4",
+      "file": "H.264 + AAC",
+      "expected_streams": "1 video, 1 audio"
+    },
+    {
+      "name": "MKV HDR",
+      "file": "HEVC/H.265 Main 10 + BT.2020 + smpte2084",
+      "expected_streams": "1 video (HDR), 1+",
+      "expected_colorspace": "bt2020 + smpte2084"
+    },
+    {
+      "name": "Multi-track",
+      "file": "ProRes + multiple audio tracks",
+      "expected_streams": "1+ video, 2+ audio"
+    },
+    {
+      "name": "Audio-only",
+      "file": "AAC file with no video track",
+      "expected_streams": "0 video, 1+ audio"
+    },
+    {
+      "name": "With subtitles",
+      "file": "File with embedded SRT/PGS subtitles",
+      "expected_streams": "At least 1 subtitle"
+    },
+    {
+      "name": "With timecode",
+      "file": "File with embedded timecode track",
+      "expected": "timecode field populated"
+    },
+    {
+      "name": "DCI-P3 color space",
+      "file": "smpte431 or smpte432 primaries",
+      "expected_colorspace": "smpte431/smpte432 + HDR"
+    },
+    {
+      "name": "Corrupted file",
+      "file": "Invalid/truncated video",
+      "expected_behavior": "Error state shown, app doesn't crash"
+    }
   ],
-  
   "implementation_notes": {
     "swift_fixes_applied": [
       "Removed duplicate convertVideo() block (lines 441-480)",
@@ -259,7 +332,6 @@
       "Portuguese labels with technical English values"
     ]
   },
-  
   "extensibility": {
     "future_fields": {
       "rotation": "Add rotation metadata if present",
@@ -270,25 +342,25 @@
     "reserved_field": "extras: [String: String] in VideoMetadata",
     "design_pattern": "All new metadata parsed into dedicated fields, extras for unknown types"
   },
-  
   "completion_criteria": [
-    "✅ Build passes in Xcode with no errors (fix duplicate code)",
-    "✅ convertVideo() has single, correct implementation",
-    "✅ Info tab visible when file loaded",
-    "✅ All stream types detected correctly",
-    "✅ HDR detection works for smpte2084, hlg, smpte431/432",
-    "✅ Colorspace displayed when present",
-    "✅ Timecode extracted when present",
-    "✅ Error handling works gracefully",
-    "✅ Multiple tracks displayed correctly",
-    "✅ Loading indicator shows during extraction",
-    "✅ Metadata refreshes on new file selection",
-    "⚠️ Tests pass on varied file types (manual testing needed)"
+    "\u2705 Build passes in Xcode with no errors (fix duplicate code)",
+    "\u2705 convertVideo() has single, correct implementation",
+    "\u2705 Info tab visible when file loaded",
+    "\u2705 All stream types detected correctly",
+    "\u2705 HDR detection works for smpte2084, hlg, smpte431/432",
+    "\u2705 Colorspace displayed when present",
+    "\u2705 Timecode extracted when present",
+    "\u2705 Error handling works gracefully",
+    "\u2705 Multiple tracks displayed correctly",
+    "\u2705 Loading indicator shows during extraction",
+    "\u2705 Metadata refreshes on new file selection",
+    "\u26a0\ufe0f Tests pass on varied file types (manual testing needed)"
   ],
-  
   "rollout_plan": {
     "phase": "Phase-2",
-    "blocking_issues": ["CONVERTVIDEO DUPLICATE CODE MUST BE FIXED FIRST"],
+    "blocking_issues": [
+      "CONVERTVIDEO DUPLICATE CODE MUST BE FIXED FIRST"
+    ],
     "dependencies_on_other_features": [],
     "can_be_implemented_independently": true,
     "implementation_order": [
@@ -303,7 +375,6 @@
       "9. Update project_structure.json"
     ]
   },
-  
   "references": {
     "related_features": [
       "Progress tracking (parseProgress already exists)",
@@ -319,5 +390,23 @@
       "File with embedded timecode",
       "File with subtitles"
     ]
+  },
+  "python_port": {
+    "status": "IMPLEMENTED",
+    "implementation_date": "2026-05-15",
+    "files_created": [
+      "python/thn_converter.py (VideoConverter.extract_metadata + 7 parse methods)",
+      "python/thn_converter.py (VideoMetadata + 5 data classes)",
+      "python/thn_converter.py (ConverterApp.create_info_tab + update_metadata_display)",
+      "python/thn_converter.py (ConverterApp.fetch_metadata)"
+    ],
+    "key_differences_from_swift": {
+      "types": "TimeInterval \u2192 float (seconds)",
+      "regex": "re.search() / re.match() instead of NSRegularExpression",
+      "async_pattern": "threading.Thread + subprocess.Popen.communicate() instead of Swift continuations",
+      "output_capture": "stderr capture via subprocess.PIPE instead of Process terminationHandler",
+      "duration_format": "format_duration() public method used by both parsing and UI"
+    },
+    "regex_patterns": "All regex patterns are direct mirrors of the Swift and C# implementations"
   }
 }

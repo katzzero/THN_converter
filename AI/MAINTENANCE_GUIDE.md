@@ -35,40 +35,39 @@ When a file changes in one implementation, the corresponding files in the other 
 
 | Swift (main) | Python (main) | C# (win) |
 |---|---|---|
-| `VideoConverter.swift` — `extractMetadata()` | **NOT IMPLEMENTED** | `Services/MetadataService.cs` — `ExtractMetadataAsync()` |
-| `VideoConverter.swift` — `parseFFmpegMetadata()` | **NOT IMPLEMENTED** | `Services/MetadataService.cs` — `ParseFfmpegOutput()` |
-| `VideoConverter.swift` — `parseVideoStream()` | **NOT IMPLEMENTED** | `Services/MetadataService.cs` — `ParseVideoStream()` |
-| `VideoConverter.swift` — `parseAudioStream()` | **NOT IMPLEMENTED** | `Services/MetadataService.cs` — `ParseAudioStream()` |
-| `VideoConverter.swift` — `parseSubtitleStream()` | **NOT IMPLEMENTED** | `Services/MetadataService.cs` — `ParseSubtitleStream()` |
-| `VideoConverter.swift` — `parseDataStream()` | **NOT IMPLEMENTED** | `Services/MetadataService.cs` — `ParseDataStream()` |
-| `VideoConverter.swift` — `extractColorSpaceInfo()` | **NOT IMPLEMENTED** | `Services/MetadataService.cs` — `ExtractColorSpace()` |
-| `VideoConverter.swift` — `hdrFormat()` | **NOT IMPLEMENTED** | `Services/MetadataService.cs` — inline in `ExtractColorSpace()` |
-| `VideoConverter.swift` — `parseDuration()` | **NOT IMPLEMENTED** | `Services/MetadataService.cs` — inline in `ParseFfmpegOutput()` |
+| `VideoConverter.swift` — `extractMetadata()` | `thn_converter.py` — `extract_metadata()` | `Services/MetadataService.cs` — `ExtractMetadataAsync()` |
+| `VideoConverter.swift` — `parseFFmpegMetadata()` | `thn_converter.py` — `_parse_ffmpeg_metadata()` | `Services/MetadataService.cs` — `ParseFfmpegOutput()` |
+| `VideoConverter.swift` — `parseVideoStream()` | `thn_converter.py` — `_parse_video_stream()` | `Services/MetadataService.cs` — `ParseVideoStream()` |
+| `VideoConverter.swift` — `parseAudioStream()` | `thn_converter.py` — `_parse_audio_stream()` | `Services/MetadataService.cs` — `ParseAudioStream()` |
+| `VideoConverter.swift` — `parseSubtitleStream()` | `thn_converter.py` — `_parse_subtitle_stream()` | `Services/MetadataService.cs` — `ParseSubtitleStream()` |
+| `VideoConverter.swift` — `parseDataStream()` | `thn_converter.py` — `_parse_data_stream()` | `Services/MetadataService.cs` — `ParseDataStream()` |
+| `VideoConverter.swift` — `extractColorSpaceInfo()` | `thn_converter.py` — `_extract_color_space_info()` | `Services/MetadataService.cs` — `ExtractColorSpace()` |
+| `VideoConverter.swift` — `hdrFormat()` | `thn_converter.py` — `_hdr_format()` | `Services/MetadataService.cs` — inline in `ExtractColorSpace()` |
+| `VideoConverter.swift` — `parseDuration()` | `thn_converter.py` — `format_duration()` (public, also used by UI) | `Services/MetadataService.cs` — inline in `ParseFfmpegOutput()` |
 
 ### Data Models
 
 | Swift (main) | Python (main) | C# (win) |
 |---|---|---|
-| `VideoConverter.swift` — `ConversionSettings` | `thn_converter.py` — `ConversionSettings` class | `Models/ConversionSettings.cs` |
-| `VideoConverter.swift` — `VideoMetadata` | **NOT IMPLEMENTED** | `Models/VideoMetadata.cs` |
-| `VideoConverter.swift` — `VideoStreamInfo` | **NOT IMPLEMENTED** | `Models/StreamInfo.cs` |
-| `VideoConverter.swift` — `AudioStreamInfo` | **NOT IMPLEMENTED** | `Models/StreamInfo.cs` |
-| `VideoConverter.swift` — `SubtitleStreamInfo` | **NOT IMPLEMENTED** | `Models/StreamInfo.cs` |
-| `VideoConverter.swift` — `DataStreamInfo` | **NOT IMPLEMENTED** | `Models/StreamInfo.cs` |
-| `VideoConverter.swift` — `ColorSpaceInfo` | **NOT IMPLEMENTED** | `Models/ColorSpaceInfo.cs` |
+| `VideoConverter.swift` — `VideoMetadata` | `thn_converter.py` — `VideoMetadata` class | `Models/VideoMetadata.cs` |
+| `VideoConverter.swift` — `VideoStreamInfo` | `thn_converter.py` — `VideoStreamInfo` class | `Models/StreamInfo.cs` |
+| `VideoConverter.swift` — `AudioStreamInfo` | `thn_converter.py` — `AudioStreamInfo` class | `Models/StreamInfo.cs` |
+| `VideoConverter.swift` — `SubtitleStreamInfo` | `thn_converter.py` — `SubtitleStreamInfo` class | `Models/StreamInfo.cs` |
+| `VideoConverter.swift` — `DataStreamInfo` | `thn_converter.py` — `DataStreamInfo` class | `Models/StreamInfo.cs` |
+| `VideoConverter.swift` — `ColorSpaceInfo` | `thn_converter.py` — `ColorSpaceInfo` class | `Models/ColorSpaceInfo.cs` |
 
 ### UI / View Layer
 
 | Swift (main) | Python (main) | C# (win) |
 |---|---|---|
-| `ContentView.swift` — body (4 tabs) | `thn_converter.py` — `ConverterApp` (3 tabs, no Info tab) | `MainWindow.xaml` (4 tabs) |
+| `ContentView.swift` — body (4 tabs) | `thn_converter.py` — `ConverterApp` (4 tabs) | `MainWindow.xaml` (4 tabs) |
 | `ContentView.swift` — `handleDrop()` | `thn_converter.py` — `select_file()` | `MainWindow.xaml.cs` — `Window_Drop()` |
 | `ContentView.swift` — `selectInputFile()` | `thn_converter.py` — `select_file()` (same) | `MainWindow.xaml.cs` — `DropZone_MouseDown()` |
 | `ContentView.swift` — `selectOutputFile()` | `thn_converter.py` — `select_output_file()` | `MainWindow.xaml.cs` — calls `SelectOutputCommand` |
 | `ContentView.swift` — `convertVideo()` | `thn_converter.py` — `start_conversion()` | `ViewModels/MainViewModel.cs` — `ConvertAsync()` |
 | `ContentView.swift` — `cancelConversion()` | `thn_converter.py` — called via button in `start_conversion()` | `ViewModels/MainViewModel.cs` — `CancelConversion()` |
-| `ContentView.swift` — `fetchMetadata()` | **NOT IMPLEMENTED** | `ViewModels/MainViewModel.cs` — `FetchMetadataAsync()` |
-| `ContentView.swift` — `formatDuration()` | **NOT IMPLEMENTED** | `ViewModels/MainViewModel.cs` — implicit via `TimeSpan.ToString()` |
+| `ContentView.swift` — `fetchMetadata()` | `thn_converter.py` — `fetch_metadata()` | `ViewModels/MainViewModel.cs` — `FetchMetadataAsync()` |
+| `ContentView.swift` — `formatDuration()` | `thn_converter.py` — `converter.format_duration()` | `ViewModels/MainViewModel.cs` — implicit via `TimeSpan.ToString()` |
 | `ContentView.swift` — `mapVideoCodec()` | `thn_converter.py` — `map_video_codec()` | `ViewModels/MainViewModel.cs` — `MapVideoCodec()` |
 
 ---
@@ -119,10 +118,10 @@ Files to modify across all 3 implementations:
 
 ```
 1. Swift:  VideoConverter.swift     → Add struct field + parsing logic
-2. C#:     Models/*.cs               → Add field
-3. C#:     Services/MetadataService.cs → Add regex + parsing
-4. All:    AI/*.json                 → Update documentation
-5. Note:   Python has NOT implemented metadata extraction
+2. Python: thn_converter.py          → Add class field + parsing in _parse_ffmpeg_metadata()
+3. C#:     Models/*.cs               → Add field
+4. C#:     Services/MetadataService.cs → Add regex + parsing
+5. All:    AI/*.json                 → Update documentation
 ```
 
 ### 6. Changing UI Text / Labels
@@ -151,18 +150,17 @@ If the change is **only relevant to one platform** (e.g., a macOS-specific UI be
 
 ---
 
-## Python Metadata Extraction Gap
+## Python Metadata Extraction (IMPLEMENTED)
 
-The Python implementation is **missing the entire metadata extraction feature** that exists in Swift and C#. Key missing functions:
+Python metadata extraction was added on 2026-05-15. Key files:
 
-- `extractMetadata()` / metadata extraction from FFmpeg
-- `parseFFmpegMetadata()` and all 6 stream parsers
-- `VideoMetadata`, `VideoStreamInfo`, `AudioStreamInfo`, etc. data classes
-- Info tab in the UI
+- Extraction logic: `python/thn_converter.py` → `VideoConverter.extract_metadata()`
+- Parsing methods: `_parse_ffmpeg_metadata()` + 6 sub-parsers
+- Data classes: `VideoMetadata`, `VideoStreamInfo`, `AudioStreamInfo`, `SubtitleStreamInfo`, `DataStreamInfo`, `ColorSpaceInfo`
+- UI: Info tab (tab 4) in `ConverterApp` + `create_info_tab()` + `update_metadata_display()`
+- Trigger: `ConverterApp.fetch_metadata()` called from `select_file()`
 
-If someone adds metadata extraction to Python, they should follow the exact same regex patterns and logic from:
-- Swift: `VideoConverter.swift` `parseFFmpegMetadata()` and sub-parsers
-- C#: `Services/MetadataService.cs` (has `[GeneratedRegex]` versions of all patterns)
+All regex patterns and logic mirror the Swift and C# implementations exactly.
 
 ---
 
