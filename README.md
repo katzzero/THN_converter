@@ -83,11 +83,3 @@ THN-Converter-Win/
 | Font paths | /System/Library/Fonts/ | C:\Windows\Fonts\ |
 | FFmpeg paths | /usr/local/bin/ffmpeg | .\ffmpeg\ffmpeg.exe, %PATH% |
 
-## macOS / Windows / Python Sync
-
-When adding features to one platform, update all implementations:
-- Swift (`THN-Converter/`)
-- Python (`THN-Converter-Python/`)
-- C# (`THN-Converter-Win/`)
-
-Also update the AI guides in `/AI/` to reflect any changes.
