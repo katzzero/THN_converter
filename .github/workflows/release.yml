@@ -33,6 +33,7 @@ jobs:
       - name: Package
         run: |
           cd build/Build/Products/Release
+          xattr -cr THN-Converter.app
           zip -r THN-Converter-macOS.zip THN-Converter.app
 
       - name: Release
@@ -40,3 +41,16 @@ jobs:
         with:
           files: build/Build/Products/Release/THN-Converter-macOS.zip
           generate_release_notes: true
+          body: |
+            ## macOS Installation
+            
+            After downloading, macOS Gatekeeper will block the app because it's not signed with an Apple Developer certificate. To open:
+            
+            ```bash
+            xattr -cr THN-Converter.app
+            ```
+            
+            Then right-click → **Open**, or run:
+            ```bash
+            open THN-Converter.app
+            ```
