@@ -20,22 +20,14 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Install WPF workload
-        run: dotnet workload install windows-desktop --skip-sign-check || true
+      - name: Build
+        run: dotnet build THN-Converter-Win.csproj -c Release
 
-      - name: Publish (single file)
-        run: |
-          dotnet publish THN-Converter-Win.csproj `
-            -c Release `
-            -r win-x64 `
-            --self-contained true `
-            -p:PublishSingleFile=true
+      - name: Publish
+        run: dotnet publish THN-Converter-Win.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true --no-build
 
       - name: Package
-        run: |
-          Compress-Archive `
-            -Path bin/Release/net8.0-windows/win-x64/publish/THN-Converter-Win.exe `
-            -DestinationPath THN-Converter-Windows.zip
+        run: Compress-Archive -Path bin/Release/net8.0-windows/win-x64/publish/THN-Converter-Win.exe -DestinationPath THN-Converter-Windows.zip
 
       - name: Release
         uses: softprops/action-gh-release@v2

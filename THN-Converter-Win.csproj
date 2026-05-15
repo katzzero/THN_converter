@@ -6,14 +6,16 @@
     <UseWPF>true</UseWPF>
     <RootNamespace>THN_Converter_Win</RootNamespace>
     <AssemblyName>THN-Converter-Win</AssemblyName>
-    <ApplicationIcon>app.ico</ApplicationIcon>
-    <SelfContained>false</SelfContained>
     <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.WindowsDesktop.App.WPF" />
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </ApplicationDefinition>
+    <Page Include="**/*.xaml" Exclude="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Content Include="ffmpeg\ffmpeg.exe" CopyToOutputDirectory="PreserveNewest" Condition="Exists('ffmpeg\ffmpeg.exe')" />
   </ItemGroup>
 
