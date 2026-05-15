@@ -1,13 +1,11 @@
 # THN Converter
 
 <p align="center">
-  <strong>Cross-Platform Video Converter with FFmpeg Backend</strong><br>
+  <strong>Python Video Converter with FFmpeg Backend</strong><br>
   <em>Conversor de Vídeo Multiplataforma com FFmpeg</em>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/macOS-SwiftUI-blue?logo=apple" alt="macOS SwiftUI">
-  <img src="https://img.shields.io/badge/Windows-WPF-purple?logo=windows" alt="Windows WPF">
   <img src="https://img.shields.io/badge/Python-CustomTkinter-green?logo=python" alt="Python">
   <img src="https://img.shields.io/badge/FFmpeg-powered-orange?logo=ffmpeg" alt="FFmpeg">
 </p>
@@ -25,15 +23,11 @@
 
 ## 🎯 Overview / Visão Geral
 
-**THN Converter** is a video conversion application available in **3 implementations** sharing the same FFmpeg backend:
+**THN Converter** is a cross-platform video converter built with **Python (CustomTkinter)** and an FFmpeg backend.
 
-| Language | Framework | Location | Branch |
-|----------|-----------|----------|--------|
-| **Swift** | SwiftUI | `macos/` | `main` + `win` |
-| **Python** | CustomTkinter | `python/` | `main` + `win` |
-| **C#** | WPF (.NET 8) | `windows/` | `win` |
-
-The Python implementation lives as a folder within both branches — it is **not** a separate branch. All three are kept feature-equal via the sync rules in `AI/MAINTENANCE_GUIDE.md`.
+This is the **Python branch**. See also:
+- [`macos`](https://github.com/katzzero/THN_converter/tree/macos) — Swift native macOS app
+- [`windows`](https://github.com/katzzero/THN_converter/tree/windows) — C# WPF Windows app
 
 ---
 
