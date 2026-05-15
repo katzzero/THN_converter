@@ -1,14 +1,13 @@
 # THN Converter
 
 <p align="center">
-  <strong>Cross-Platform Video Converter with FFmpeg Backend</strong><br>
-  <em>Conversor de Vídeo Multiplataforma com FFmpeg</em>
+  <strong>Windows Video Converter with FFmpeg Backend</strong><br>
+  <em>Conversor de Vídeo para Windows com FFmpeg</em>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/macOS-SwiftUI-blue?logo=apple" alt="macOS SwiftUI">
   <img src="https://img.shields.io/badge/Windows-WPF-purple?logo=windows" alt="Windows WPF">
-  <img src="https://img.shields.io/badge/Python-CustomTkinter-green?logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/.NET-8-blue?logo=dotnet" alt=".NET 8">
   <img src="https://img.shields.io/badge/FFmpeg-powered-orange?logo=ffmpeg" alt="FFmpeg">
 </p>
 
@@ -25,7 +24,11 @@
 
 ## 🎯 Overview / Visão Geral
 
-**THN Converter** is a video conversion application available in **3 implementations** sharing the same FFmpeg backend:
+**THN Converter** is a native Windows video converter built with **C# WPF (.NET 8)** and an FFmpeg backend.
+
+This is the **Windows branch**. See also:
+- [`macos`](https://github.com/katzzero/THN_converter/tree/macos) — Swift native macOS app
+- [`python`](https://github.com/katzzero/THN_converter/tree/python) — Python implementation
 
 | Language | Framework | Location | Branch |
 |----------|-----------|----------|--------|
