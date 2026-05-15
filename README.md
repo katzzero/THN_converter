@@ -1,8 +1,15 @@
 # THN Converter
 
 <p align="center">
-  <strong>macOS Video Converter with FFmpeg Backend</strong><br>
-  <em>Conversor de Vídeo para macOS com FFmpeg</em>
+  <strong>Cross-Platform Video Converter with FFmpeg Backend</strong><br>
+  <em>Conversor de Vídeo Multiplataforma com FFmpeg</em>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/macOS-SwiftUI-blue?logo=apple" alt="macOS SwiftUI">
+  <img src="https://img.shields.io/badge/Windows-WPF-purple?logo=windows" alt="Windows WPF">
+  <img src="https://img.shields.io/badge/Python-CustomTkinter-green?logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/FFmpeg-powered-orange?logo=ffmpeg" alt="FFmpeg">
 </p>
 
 <p align="center">
@@ -18,9 +25,15 @@
 
 ## 🎯 Overview / Visão Geral
 
-**THN Converter** is a powerful macOS application for video conversion, built with SwiftUI and backed by FFmpeg. It supports multiple video/audio codecs, customizable resolutions, frame rates, timecode overlay, and detailed file metadata extraction.
+**THN Converter** is a powerful video conversion application available on **3 platforms** with **3 independent implementations**, all sharing the same FFmpeg backend:
 
-**THN Converter** é um aplicativo macOS poderoso para conversão de vídeo, construído com SwiftUI e baseado em FFmpeg. Suporta múltiplos codecs de vídeo/áudio, resoluções personalizáveis, taxas de quadro, sobreposição de timecode e extração detalhada de metadados de arquivos.
+| Platform | Language | Framework | Directory |
+|----------|----------|-----------|-----------|
+| **macOS** | Swift | SwiftUI | `macos/` |
+| **Windows** | C# | WPF (.NET 8) | `windows/` |
+| **Cross-platform** | Python | CustomTkinter | `python/` |
+
+All three implementations are **feature-equal** and maintained in sync via the `win` branch.
 
 ---
 
@@ -60,45 +73,59 @@
 
 ## 📦 Installation / Instalação
 
-### Prerequisites / Pré-requisitos
+### macOS (Swift)
 
+#### Prerequisites
 - macOS 14.6 or later
-- Xcode 15.0+ (for building)
+- Xcode 15.0+
 - Swift 5.9+
-- FFmpeg automatically downloaded during build
 
-### Building / Construindo
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/thn-converter.git
-   cd thn-converter
-   ```
-
-2. **Download FFmpeg**
-   ```bash
-   ./download-ffmpeg.sh
-   ```
-   This automatically detects your architecture (Apple Silicon/Intel) and downloads the appropriate FFmpeg binary to the project root.
-
-3. **Open in Xcode**
-   ```bash
-   open thn-converter/THN-Converter.xcodeproj
-   ```
-
-4. **Build and Run**
-   - Select "THN-Converter" scheme
-   - Choose destination Mac
-   - Press Cmd+R to build and run
-
-### Command Line Build / Build via Linha de Comando
-
+#### Building
 ```bash
-cd thn-converter
+git clone https://github.com/katzzero/THN_converter.git
+cd macos
+./download-ffmpeg.sh
+open THN-Converter.xcodeproj
+# Select "THN-Converter" scheme → Cmd+R
+```
+
+#### Command Line
+```bash
+cd macos
 xcodebuild -project THN-Converter.xcodeproj -scheme THN-Converter -configuration Debug build
 ```
 
-The app will be available in `~/Library/Developer/Xcode/DerivedData/Build/Products/Debug/THN-Converter.app`
+### Windows (C# WPF)
+
+#### Prerequisites
+- Windows 10/11 (x64)
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [FFmpeg](https://github.com/BtbN/FFmpeg-Builds/releases) (place `ffmpeg.exe` in `windows/ffmpeg/`)
+
+#### Building
+```bash
+cd windows
+dotnet build -c Release
+dotnet run
+```
+
+#### Publish as Single-File
+```bash
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
+```
+
+### Python (Cross-platform)
+
+#### Prerequisites
+- Python 3.9+
+- [FFmpeg](https://ffmpeg.org/download.html) in system PATH
+
+#### Setup
+```bash
+cd python
+pip install customtkinter
+python3 thn_converter.py
+```
 
 ---
 
@@ -182,94 +209,92 @@ The app will be available in `~/Library/Developer/Xcode/DerivedData/Build/Produc
 
 ```
 THN Converter/
-├── thn-converter/              # Swift (macOS app)
+├── macos/                      # Swift (macOS native app)
 │   ├── THN-Converter/
 │   │   ├── THN_ConverterApp.swift   # App entry point
 │   │   ├── ContentView.swift        # Main UI
-│   │   ├── VideoConverter.swift     # Conversion logic
+│   │   ├── VideoConverter.swift     # Conversion + metadata logic
 │   │   └── Assets.xcassets/         # App resources
 │   └── THN-Converter.xcodeproj      # Xcode project
-├── THN-Converter-Python/       # Python (alternative implementation)
-│   └── thn_converter.py
-├── ffmpeg                       # FFmpeg binary (63MB)
-├── download-ffmpeg.sh          # Auto-download script
-├── update_project_json.sh      # Update project_structure.json
-└── project_structure.json      # Project documentation
+├── python/                     # Python (cross-platform)
+│   └── thn_converter.py             # Full implementation
+├── windows/                    # C# WPF (Windows native)
+│   ├── Models/                 # Data classes
+│   ├── Services/               # FFmpeg + metadata services
+│   ├── ViewModels/             # MVVM ViewModel
+│   └── MainWindow.xaml         # 4-tab UI
+├── AI/                         # AI project guides
+│   ├── MAINTENANCE_GUIDE.md    # 3-branch sync rules
+│   ├── thn_converter_manifest.json
+│   ├── project_structure_guide.json
+│   └── metadata_extraction_guide.json
+├── ffmpeg                      # FFmpeg binary (macOS)
+└── download-ffmpeg.sh          # Auto-download script
 ```
 
 ### Architecture / Arquitetura
 
-**Swift Implementation**:
-- SwiftUI for declarative UI
-- AppKit for file dialogs
-- UniformTypeIdentifiers for file type detection
-- Process API for FFmpeg integration
+**Swift (macOS)**: SwiftUI + AppKit + Process API
+**C# (Windows)**: WPF + MVVM + System.Diagnostics.Process
+**Python**: CustomTkinter + subprocess + threading
 
-**Python Implementation**:
-- CustomTkinter for cross-platform UI
-- subprocess for FFmpeg integration
-- threading for async operations
+**FFmpeg Integration** (all implementations):
+- macOS: Bundled + `/usr/local/bin` → `/opt/homebrew/bin` → `/usr/bin`
+- Windows: Bundled `windows/ffmpeg/` → `%LOCALAPPDATA%` → Program Files → PATH
+- Python: Same as macOS paths + cross-platform
 
-**FFmpeg Integration**:
-- FFmpeg bundled with app (not sandboxed)
-- Auto-download script for first-time setup
-- Search paths: bundle → /usr/local/bin → /opt/homebrew/bin → /usr/bin
+### Sync Across Implementations
 
-### Adding New Features / Adicionando Novos Recursos
+All three implementations must remain **feature-equal**. When adding features:
 
-#### Add New Video Codec:
-1. Update `VideoConverter.mapVideoCodec()` switch
-2. Add to `ContentView.swift` picker options
-3. Update `project_structure.json` features array
-4. Sync with Python implementation
+```
+1. Swift (macos/)  →  2. Python (python/)  →  3. C# (windows/)  →  4. Update AI/ guides
+```
 
-#### Add New Metadata Field:
-1. Update `VideoMetadata` struct
-2. Add parsing method in `parseFFmpegMetadata()`
-3. Update UI in Info Tab
-4. Document in README
+See `AI/MAINTENANCE_GUIDE.md` for the complete file mapping and sync checklists.
 
 ### Building Commands / Comandos de Build
 
 ```bash
-# Debug build
+# Swift (macOS)
+cd macos
 xcodebuild -project THN-Converter.xcodeproj -scheme THN-Converter -configuration Debug build
 
-# Release build
-xcodebuild -project THN-Converter.xcodeproj -scheme THN-Converter -configuration Release build
+# C# (Windows)
+cd windows
+dotnet build -c Release
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
 
-# Run tests (none configured)
-# No automated tests yet
-
-# Clean build artifacts
-xcodebuild clean
-rm -rf thn-converter/build/
+# Python (any platform)
+cd python
+pip install customtkinter
+python3 thn_converter.py
 ```
-
-### Project Management / Gerenciamento do Projeto
-
-- **JSON Documentation**: `project_structure.json` contains complete project reference
-- **Update Script**: `./update_project_json.sh` auto-syncs project state
-- **Version Tracking**: Git commits reference features/fixes in messages
 
 ---
 
 ## ⚠️ Known Issues / Problemas Conhecidos
 
-### Font Path / Caminho da Fonte
-- **Issue**: Helvetica.ttc may not exist on all macOS versions
-- **Impact**: Timecode overlay may fail on macOS < 14.6
-- **Workaround**: Add font fallback in `getTimecodeFilter()`
-- **Status**: KNOWN_ISSUE
+### Font Path
+- **macOS**: Helvetica.ttc may not exist on all versions — falls back through font list
+- **Windows**: Arial.ttf may not exist — falls back through segoeui → tahoma → verdana → trebuc
+- **Impact**: Timecode overlay may fail if no font found on either platform
+- **Status**: KNOWN_ISSUE (both platforms have fallback lists)
 
-### Build Target Inconsistency / Inconsistência de Build
-- **Project Level**: macOS 13.0
-- **Native Target**: macOS 14.6
+### Build Target Inconsistency
+- **macOS**: Project level 13.0 vs Native target 14.6
 - **Status**: Should be aligned in future update
 
 ---
 
 ## 📋 Version History / Histórico de Versões
+
+### v1.1.0 (2026-05-15)
+- ✅ Windows C# WPF native app (win branch)
+- ✅ Python metadata extraction + Info tab
+- ✅ All 3 implementations feature-equal
+- ✅ AI maintenance guide for sync rules
+- ✅ Project structure reorganized (macos/ python/ windows/)
 
 ### v1.0.0 (2026-04-28)
 - ✅ Core conversion functionality
@@ -279,58 +304,37 @@ rm -rf thn-converter/build/
 - ✅ Cancel support
 - ✅ Multi-track metadata extraction
 - ✅ HDR/SDR color space detection
-- ⚠️ Font fallback (Phase-2 work in progress)
-
-### Previous Versions
-- Phase-1: Fixed progression calculation, timecode format, FFmpeg integration
-- Phase-2: Adding font fallback, input validation, metadata extraction (COMPLETE)
 
 ---
 
 ## 🤝 Contributing / Contribuindo
-
-Contributions are welcome! Please follow these guidelines:
 
 ### Guidelines / Diretrizes
 
 1. **Code Style**:
    - Swift: camelCase for functions
    - Python: snake_case for functions
-   - Follow existing conventions
+   - C#: PascalCase with MVVM pattern
 
-2. **Metadata Extraction**:
-   - Test with varied file types
-   - Verify parsing accuracy
-   - Update `project_structure.json`
+2. **Feature Parity**:
+   - Any feature added to one implementation **must** be replicated in the other two
+   - See `AI/MAINTENANCE_GUIDE.md` for file mapping
 
-3. **FFmpeg Changes**:
-   - Always keep auto-download functional
-   - Test all codecs after changes
-   - Document any breaking changes
-
-4. **Testing**:
-   - Test with real files (not just generated)
-   - Verify all codec combinations
-   - Check error handling paths
-
-### Testing Checklist / Checklist de Testes
-
-- [ ] Standard MP4 (H.264 + AAC)
-- [ ] HDR HEVC MKV (Main 10 + BT.2020 + smpte2084)
-- [ ] Multi-track ProRes
-- [ ] Audio-only files
-- [ ] Corrupted files (error handling)
-- [ ] Files with subtitles
-- [ ] Files with embedded timecodes
-- [ ] Files with DCI-P3 color space
+3. **Testing Checklist / Checklist de Testes**:
+   - [ ] Standard MP4 (H.264 + AAC)
+   - [ ] HDR HEVC MKV (Main 10 + BT.2020 + smpte2084)
+   - [ ] Multi-track ProRes
+   - [ ] Audio-only files
+   - [ ] Corrupted files (error handling)
+   - [ ] Files with subtitles
+   - [ ] Files with embedded timecodes
+   - [ ] Files with DCI-P3 color space
 
 ---
 
 ## 📄 License / Licença
 
 This project is licensed under the terms specified in the [LICENSE](LICENSE) file.
-
-Este projeto está licenciado sob os termos especificados no arquivo [LICENSE](LICENSE).
 
 ---
 
@@ -346,13 +350,11 @@ Este projeto está licenciado sob os termos especificados no arquivo [LICENSE](L
 
 For issues, questions, or suggestions, please open an issue on GitHub.
 
-Para problemas, perguntas ou sugestões, abra um issue no GitHub.
-
 ---
 
 <div align="center">
 
-**Made with ❤️ for macOS**
+**Made with ❤️ — available on macOS, Windows, and cross-platform Python**
 
 ---
 
