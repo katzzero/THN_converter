@@ -3,8 +3,6 @@ ffmpeg
 ffmpeg_downloaded_flag
 ffprobe
 *ffprobe*
-# C# bundled ffmpeg (download manually, not tracked in git)
-windows/ffmpeg/ffmpeg.exe
 
 # Build script (not ignored)
 # download-ffmpeg.sh is tracked manually
