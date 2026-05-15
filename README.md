@@ -1,6 +1,6 @@
 # THN Converter for Windows
 
-Native Windows WPF application built with .NET 8. FFmpeg backend for video conversion.
+Native Windows application built with .NET 8 and WPF. FFmpeg backend for video conversion.
 
 ## Prerequisites
 
@@ -17,12 +17,7 @@ dotnet build THN-Converter-Win.csproj -c Release
 # Run
 dotnet run --project THN-Converter-Win.csproj
 
-# Or open THN-Converter-Win.sln in Visual Studio 2022
-```
-
-## Publish as Single-File Executable
-
-```bash
+# Publish as single-file executable
 dotnet publish THN-Converter-Win.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
 ```
 
@@ -35,6 +30,22 @@ Option 2 - **Bundled**: Place `ffmpeg.exe` in the `ffmpeg/` folder (auto-detecte
 Option 3 - **Manual**: Install to `%LOCALAPPDATA%\ffmpeg\ffmpeg.exe` or `C:\Program Files\ffmpeg\bin\ffmpeg.exe`
 
 Download from: [BtbN/FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds/releases)
+
+## Usage
+
+1. Open the app
+2. Drag a video file to the designated area
+3. Configure options:
+   - Video codec
+   - Quality (CRF)
+   - Resolution (4K, Full HD, HD, SD, Original)
+   - Framerate (60, 30, 24, etc)
+   - Audio codec
+   - Audio bitrate
+   - Sample rate
+   - Timecode overlay (optional)
+4. Click "Convert"
+5. File saved to chosen location
 
 ## Features
 
@@ -72,14 +83,13 @@ THN-Converter-Win/
 └── ffmpeg/                       # Put ffmpeg.exe here
 ```
 
-## Key Differences from macOS Swift Version
+## Technologies
 
-| Feature | Swift (macOS) | C# (Windows) |
-|---------|---------------|--------------|
-| UI Framework | SwiftUI | WPF + XAML |
-| Pattern | @State / ObservableObject | MVVM (INotifyPropertyChanged) |
-| Async | async/await + Continuation | async Task + IProgress<T> |
-| Regex | NSRegularExpression | [GeneratedRegex] (C# 11) |
-| Font paths | /System/Library/Fonts/ | C:\Windows\Fonts\ |
-| FFmpeg paths | /usr/local/bin/ffmpeg | .\ffmpeg\ffmpeg.exe, %PATH% |
+- **C# 12** - Language
+- **WPF + XAML** - Interface
+- **FFmpeg** - Conversion engine
+- **.NET 8** - Runtime
 
+## License
+
+MIT
