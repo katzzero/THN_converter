@@ -51,7 +51,7 @@ Download from: [BtbN/FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds/releas
 ## Project Structure
 
 ```
-win/THN-Converter-Win/
+THN-Converter-Win/
 ├── THN-Converter-Win.csproj   # .NET 8 WPF project
 ├── App.xaml / App.xaml.cs      # App entry point
 ├── MainWindow.xaml              # 4-tab UI
@@ -83,11 +83,11 @@ win/THN-Converter-Win/
 | Font paths | /System/Library/Fonts/ | C:\Windows\Fonts\ |
 | FFmpeg paths | /usr/local/bin/ffmpeg | .\ffmpeg\ffmpeg.exe, %PATH% |
 
-## macOS ↔ Windows Sync
+## macOS / Windows / Python Sync
 
 When adding features to one platform, update all implementations:
-- Swift (`thn-converter/THN-Converter/`)
+- Swift (`THN-Converter/`)
 - Python (`THN-Converter-Python/`)
-- C# (`win/THN-Converter-Win/`)
+- C# (`THN-Converter-Win/`)
 
 Also update the AI guides in `/AI/` to reflect any changes.
