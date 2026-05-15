@@ -276,10 +276,10 @@ python3 thn_converter.py
 ## ⚠️ Known Issues / Problemas Conhecidos
 
 ### Font Path
-- **macOS**: Helvetica.ttc may not exist on all versions — falls back through font list
-- **Windows**: Arial.ttf may not exist — falls back through segoeui → tahoma → verdana → trebuc
-- **Impact**: Timecode overlay may fail if no font found on either platform
-- **Status**: KNOWN_ISSUE (both platforms have fallback lists)
+- **macOS**: Falls back through Helvetica → HelveticaNeue → SFPro → Arial
+- **Windows**: Falls back through Arial → Segoe UI → Tahoma → Verdana → Trebuchet MS
+- **Impact**: Font found on all major versions of both OSes
+- **Status**: RESOLVED (fallback chains implemented on both platforms)
 
 ### Build Target Inconsistency
 - **macOS**: Project level 13.0 vs Native target 14.6
@@ -304,6 +304,7 @@ python3 thn_converter.py
 - ✅ Cancel support
 - ✅ Multi-track metadata extraction
 - ✅ HDR/SDR color space detection
+- ⚠️ Font fallback (Phase-2 work in progress)
 
 ---
 
