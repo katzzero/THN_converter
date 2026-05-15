@@ -1,0 +1,24 @@
+name: Release Python
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package source
+        run: |
+          zip -r THN-Converter-Python.zip \
+            thn_converter.py requirements.txt create-app.sh install.sh README.md LICENSE
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: THN-Converter-Python.zip
+          generate_release_notes: true
