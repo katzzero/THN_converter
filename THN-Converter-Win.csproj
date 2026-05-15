@@ -8,7 +8,6 @@
     <AssemblyName>THN-Converter-Win</AssemblyName>
     <ApplicationIcon>app.ico</ApplicationIcon>
     <SelfContained>false</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>

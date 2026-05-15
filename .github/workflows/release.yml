@@ -21,10 +21,10 @@ jobs:
           dotnet-version: '8.x'
 
       - name: Restore
-        run: dotnet restore THN-Converter-Win.csproj
+        run: dotnet restore THN-Converter-Win.csproj -r win-x64
 
       - name: Build
-        run: dotnet build THN-Converter-Win.csproj -c Release --no-restore
+        run: dotnet build THN-Converter-Win.csproj -c Release -r win-x64 --no-restore
 
       - name: Publish
         run: |
